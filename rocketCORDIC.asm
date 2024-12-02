@@ -98,7 +98,7 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .end_macro
 
-.globl main
+.globl CORDIC
 # Example usage of the macro
 main:
     l.s $f0, testconst        # Load test angle (theta)

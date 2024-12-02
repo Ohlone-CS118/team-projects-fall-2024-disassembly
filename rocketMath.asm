@@ -45,7 +45,7 @@ grav_const: .float 9.80
 
 .text
 
-.globl main
+.globl rocketMath
 
 main:
 
