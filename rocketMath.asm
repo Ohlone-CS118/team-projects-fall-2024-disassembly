@@ -8,10 +8,10 @@ grav_const: .float 9.80
     # Ax = Tx/m
     mtc1 %Tx, $f2
     mtc1 %m, $f4
-    cvt.d.w $f2, $f2
-    cvt.d.w $f4, $f4
+    cvt.s.w $f2, $f2
+    cvt.s.w $f4, $f4
     
-    div.d %Ax, $f2, $f4
+    div.s %Ax, $f2, $f4
 .end_macro
 
 .macro Ay(%Ay, %Ty, %m)
@@ -30,8 +30,22 @@ grav_const: .float 9.80
     add.s %Vf, %Vi, %a
 .end_macro
 
+# Preconditions: Xi and Yi must be valid integers
+#                Vx and Vy must be calculated from vel_component and remain in FPU
+.macro coordinate(%Xi, %Yi, %Vx, %Vy ,%Xf, %Yf)
+    cvt.w.s %Vx, %Vx
+    cvt.w.s %Vy, %Vy
+
+    mtc0 $s0, %Vx
+    mtc0 $s1, %Vy
+
+    add %Xf, %Xi, $s0
+    add %Yf, %Yi, $s1
+.end_macro
 
 .text
+
+.globl main
 
 main:
 
