@@ -194,6 +194,14 @@ __keyboard_interrupt:
 	li $v0, 11 		# print the character entered 
 	move $a0, $k1 
 	syscall       
+
+    beq $k1, 'w', wI
+    beq $k1, 'a', aI
+    beq $k1, 's', sI
+    beq $k1, 'd', dI
+    beq $k1, 'y', yI
+    beq $k1, 'n', nI
+    beq $k1, '\n', endlI
 	
 	j __resume
 	
