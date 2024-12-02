@@ -3,14 +3,17 @@ arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.06241
                      0.031239833, 0.015623729, 0.007812341, 0.003906230, 0.001953123,
                      0.000976562, 0.000488281, 0.000244141, 0.000122070, 0.000061035,
                      0.000030518
+
 scaling_factor: .float 0.607252935 # Scaling factor K
 
 flt_neg_one: .float -1.0
 flt_one: .float 1.0
 flt_zero: .float 0.0
 
-testconst: .float 1.5707963
-thrustconst: .float 160.0
+pi: .float 3.14159265
+
+testconst: .float 0.0
+thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .text
 
@@ -28,7 +31,7 @@ thrustconst: .float 160.0
     mul.s $f8, $f8, %thrust   # Scale K by thrust magnitude
     mov.s $f2, $f8            # x = K * thrust (cosine component)
     l.s $f3, flt_zero         # y = 0 (sine component)
-    mov.s $f1, %angle         # z = theta (input angle)
+    mov.s $f1, %angle         # z = theta (input angle in radians)
 
     # Iterate through the arctan table
     li $t0, 0                 # Iteration index
@@ -56,12 +59,16 @@ thrustconst: .float 160.0
         mov.s $f20, $f2           # Save x in $f20
         mov.s $f22, $f3           # Save y in $f22
 
-        # x = x - d * y * 2^-i
-        mul.s $f24, $f12, $f3     # d * y
-        mtc1 $t0, $f28            # Move $t0 to $f28 (integer to float)
+        # Correct calculation of 2^-i
+        li $t2, 1                 # Load 1
+        sllv $t2, $t2, $t0        # Left shift by $t0 to compute 2^i
+        mtc1 $t2, $f28            # Move integer to $f28
         cvt.s.w $f28, $f28        # Convert $f28 to floating-point
         l.s $f29, flt_one         # Load 1.0 into $f29
-        div.s $f26, $f29, $f28    # 2^-i = 1.0 / (2^i)
+        div.s $f26, $f29, $f28    # Compute 2^-i
+
+        # x = x - d * y * 2^-i
+        mul.s $f24, $f12, $f3     # d * y
         mul.s $f24, $f24, $f26    # d * y * 2^-i
         sub.s $f2, $f2, $f24      # Update x
 
@@ -74,14 +81,28 @@ thrustconst: .float 160.0
         mul.s $f24, $f12, $f10    # d * arctan(2^-i)
         sub.s $f1, $f1, $f24      # Update z
 
+        # Debugging: Print x, y, z
+        # li $v0, 2             # Print floating-point
+        # mov.s $f12, $f2       # x
+        # syscall
+        # li $v0, 2
+        # mov.s $f12, $f3       # y
+        # syscall
+        # li $v0, 2
+        # mov.s $f12, $f1       # z
+        # syscall
+
         # Increment iteration index
         addi $t0, $t0, 1
         j CORDIC_LOOP_M0
 
     CORDIC_DONE_M0:
         # Scale results by thrust magnitude
-        mov.s %cosine, $f2        # Final cosine value -> %cosine
-        mov.s %sine, $f3          # Final sine value -> %sine
+        # mul.s $f2, $f2, %thrust    # Final cosine value scaled
+        # mul.s $f3, $f3, %thrust    # Final sine value scaled
+        mov.s %cosine, $f2         # Store scaled cosine in %cosine
+        mov.s %sine, $f3           # Store scaled sine in %sine
+
 .end_macro
 
 # Example usage of the macro
@@ -90,10 +111,15 @@ main:
     l.s $f1, thrustconst         # Load thrust magnitude = 1.0
     CORDIC $f0, $f1, $f4, $f6 # Compute cosine in $f4, sine in $f6
 
-    l.s $f1, thrustconst
+    # l.s $f1, thrustconst
+    # mul.s $f8, $f1, $f4   # x-component = thrust * cos(theta)
+    # mul.s $f9, $f1, $f6     # y-component = thrust * sin(theta)
 
-    mul.s $f8, $f1, $f4   # x-component = thrust * cos(theta)
-    mul.s $f9, $f1, $f6     # y-component = thrust * sin(theta)
+    li $v0, 2             
+    mov.s $f12, $f4       
+    syscall
+    mov.s $f12, $f6
+    syscall
 
 
     # Exit
