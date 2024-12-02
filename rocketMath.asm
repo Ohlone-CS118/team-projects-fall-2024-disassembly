@@ -5,7 +5,7 @@ grav_const: .float 9.80
 # Postconditiond: %Ax is acceleration in x direction - FPU register 
 # USE FLOATS
 .macro Ax(%Ax, %Tx, %m)
-    # Ax = (Thrust) * cos(theta)
+    # Ax = Tx/m
     mtc1 %Tx, $f2
     mtc1 %m, $f4
     cvt.d.w $f2, $f2
