@@ -1,3 +1,6 @@
+# Source: https://en.wikipedia.org/wiki/CORDIC
+# Implemented by Mohammed Aziz Quraishi
+
 .data
 arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.062418810,
                      0.031239833, 0.015623729, 0.007812341, 0.003906230, 0.001953123,
@@ -20,16 +23,13 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 # Preconditions:
     # %angle: Input angle in radians (in $f0 or other floating-point register)
-    # %thrust: Input thrust magnitude (in $f1 or other floating-point register)
 # Postcondition:
-    # %cosine: Cosine value scaled by thrust magnitude
-    # %sine: Sine value scaled by thrust magnitude
+    # %cosine: Cosine value 
+    # %sine: Sine value 
 # Macro to perform the entire CORDIC algorithm
-.macro CORDIC(%angle, %thrust, %cosine, %sine)
+.macro CORDIC(%angle, %cosine, %sine)
     # Initialize variables
-    l.s $f8, scaling_factor   # Load scaling factor K
-    mul.s $f8, $f8, %thrust   # Scale K by thrust magnitude
-    mov.s $f2, $f8            # x = K * thrust (cosine component)
+    l.s $f2, scaling_factor   # x = K (cosine component)
     l.s $f3, flt_zero         # y = 0 (sine component)
     mov.s $f1, %angle         # z = theta (input angle in radians)
 
@@ -108,12 +108,12 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 # Example usage of the macro
 main:
     l.s $f0, testconst        # Load test angle (theta)
-    l.s $f1, thrustconst         # Load thrust magnitude = 1.0
-    CORDIC $f0, $f1, $f4, $f6 # Compute cosine in $f4, sine in $f6
+    l.s $f1, thrustconst      # Load thrust magnitude = 1.0
+    CORDIC $f0, $f4, $f6 # Compute cosine in $f4, sine in $f6
 
     # l.s $f1, thrustconst
     # mul.s $f8, $f1, $f4   # x-component = thrust * cos(theta)
-    # mul.s $f9, $f1, $f6     # y-component = thrust * sin(theta)
+    # mul.s $f9, $f1, $f6   # y-component = thrust * sin(theta)
 
     li $v0, 2             
     mov.s $f12, $f4       
