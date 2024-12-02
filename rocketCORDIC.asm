@@ -1,6 +1,10 @@
 # Source: https://en.wikipedia.org/wiki/CORDIC
 # Implemented by Mohammed Aziz Quraishi
 
+# Preconditions: Angle in radians in $f0
+# Postcondition: cos(theta) in $f4
+#                sin(theta) in $f6
+
 .data
 arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.062418810,
                      0.031239833, 0.015623729, 0.007812341, 0.003906230, 0.001953123,
@@ -81,17 +85,6 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         mul.s $f24, $f12, $f10    # d * arctan(2^-i)
         sub.s $f1, $f1, $f24      # Update z
 
-        # Debugging: Print x, y, z
-        # li $v0, 2             # Print floating-point
-        # mov.s $f12, $f2       # x
-        # syscall
-        # li $v0, 2
-        # mov.s $f12, $f3       # y
-        # syscall
-        # li $v0, 2
-        # mov.s $f12, $f1       # z
-        # syscall
-
         # Increment iteration index
         addi $t0, $t0, 1
         j CORDIC_LOOP_M0
@@ -100,28 +93,19 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         # Scale results by thrust magnitude
         # mul.s $f2, $f2, %thrust    # Final cosine value scaled
         # mul.s $f3, $f3, %thrust    # Final sine value scaled
-        mov.s %cosine, $f2         # Store scaled cosine in %cosine
-        mov.s %sine, $f3           # Store scaled sine in %sine
+        mov.s %cosine, $f2           # Cosine in %cosine
+        mov.s %sine, $f3             # Sine in %sine
 
 .end_macro
 
+.globl main
 # Example usage of the macro
 main:
     l.s $f0, testconst        # Load test angle (theta)
-    l.s $f1, thrustconst      # Load thrust magnitude = 1.0
-    CORDIC $f0, $f4, $f6 # Compute cosine in $f4, sine in $f6
+    CORDIC $f0, $f4, $f6      # Compute cosine in $f4, sine in $f6
 
-    # l.s $f1, thrustconst
-    # mul.s $f8, $f1, $f4   # x-component = thrust * cos(theta)
-    # mul.s $f9, $f1, $f6   # y-component = thrust * sin(theta)
-
-    li $v0, 2             
-    mov.s $f12, $f4       
-    syscall
-    mov.s $f12, $f6
-    syscall
-
-
-    # Exit
-    li $v0, 10
-    syscall
+    # li $v0, 2             
+    # mov.s $f12, $f4       
+    # syscall
+    # mov.s $f12, $f6
+    # syscall
