@@ -1,5 +1,4 @@
 .include "rocketCORDIC.asm"
-.include "utilities.asm"
 
 .data
 
@@ -19,8 +18,8 @@ grav_const: .float 9.80
     mtc1 %T, $f2
     cvt.s.w $f2, $f2
 
-    mul.s %Tx, $f2, $f4
-    mul.s %Ty, $f2, $f6
+    mul.s %Tx, $f2, $f4     # Tx = T * cos(angle)
+    mul.s %Ty, $f2, $f6     # Ty = T * sin(angle)
 
     popfloat($f6)
     popfloat($f4)
@@ -83,22 +82,62 @@ grav_const: .float 9.80
 # Preconditions: Xi and Yi must be valid integers
 #                Vx and Vy must be calculated from vel_component and remain in FPU
 # Postconditions: %Xf and %Yf are final coordinates of the rocket
-.macro coordinate(%Xi, %Yi, %Vx, %Vy ,%Xf, %Yf)
-    cvt.w.s %Vx, %Vx
-    cvt.w.s %Vy, %Vy
+#                 %dt is the time it takes to get to final coordinate (float)
+.macro coordinate(%Xi, %Yi, %Vx, %Vy, %Xf, %Yf, %dt)
+    pushfloat($f2)
+    pushfloat($f4)
+    pushfloat($f6)
+    pushfloat($f8)
 
-    mtc0 %Vx, $s0
-    mtc0 %Vy, $s1
+    # Calculate velocity magnitude: sqrt(Vx^2 + Vy^2)
+    mul.s $f2, %Vx, %Vx        # Vx^2
+    mul.s $f4, %Vy, %Vy        # Vy^2
+    add.s $f6, $f2, $f4        # Vx^2 + Vy^2
+    sqrt.s $f8, $f6            # Magnitude = sqrt(Vx^2 + Vy^2)
 
-    add %Xf, %Xi, $s0
-    add %Yf, %Yi, $s1
+    # Calculate time to travel 1 meter: t = 1 / Magnitude
+    l.s $f2, flt_one           # Distance to next pixel = 1 meter
+    div.s %dt, $f2, $f8        # t = 1 / Magnitude
+
+    # Normalize velocity components
+    div.s $f6, %Vx, $f8        # Normalized Vx
+    div.s $f8, %Vy, $f8        # Normalized Vy
+
+    # Determine direction of movement
+    check_x_direction:
+        c.lt.s $f6, $f2            # Check if Vx < 0
+        bc1t move_left_or_down     # If true, move left or diagonal down
+        addi %Xf, %Xi, 1           # Otherwise, move right
+
+    check_y_direction:
+        c.lt.s $f8, $f2            # Check if Vy < 0
+        bc1t move_down             # If true, move down
+        addi %Yf, %Yi, 1           # Otherwise, move up
+        j coordinate_done
+
+    move_left_or_down:
+        subi %Xf, %Xi, 1           # Move left
+        c.lt.s $f8, $f2            # Check if Vy < 0
+        bc1t move_down             # If true, continue moving down
+        j coordinate_done
+
+    move_down:
+        subi %Yf, %Yi, 1           # Move down
+
+    coordinate_done:
+        popfloat($f8)
+        popfloat($f6)
+        popfloat($f4)
+        popfloat($f2)
 .end_macro
+
 
 .text
 
 .globl rocketMath
 
 rocketMath:
+    push($ra)
 
     # $f0 = angle
     # $t1 = thrust
@@ -107,11 +146,20 @@ rocketMath:
     # $a3 = initial y coordinate
     # $a0 = final x coordinate
     # $a1 = final y coordinate
+    # $f16 = time to next pixel
 
 
     thrust_components($f8, $f10, $t1, $f0)
 
-    Ax($f4, $t1, $t2)
-    Ay($f6, $t1, $t2)
+    Ax($f4, $f8, $t2)
+    Ay($f6, $f10, $t2)
 
+    # Update velocities
+    vel_component($f4, $f12, $f12) # Vfx = Vix + Ax
+    vel_component($f6, $f14, $f14) # Vfy = Viy + Ay
+
+    # Determine next pixel
+    coordinate($a2, $a3, $f12, $f14, $a0, $a1, $f16)  # New x in $a0, new y in $a1, time in $f16
+
+    pop($ra)
     jr $ra
