@@ -1,10 +1,6 @@
 # Source: https://en.wikipedia.org/wiki/CORDIC
 # Implemented by Mohammed Aziz Quraishi
 
-# Preconditions: Angle in radians in $f0
-# Postcondition: cos(theta) in $f4
-#                sin(theta) in $f6
-
 .data
 arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.062418810,
                      0.031239833, 0.015623729, 0.007812341, 0.003906230, 0.001953123,
@@ -19,7 +15,7 @@ flt_zero: .float 0.0
 
 pi: .float 3.14159265
 
-testconst: .float 0.0
+#testconst: .float 0.0
 thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .text
@@ -98,12 +94,14 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .end_macro
 
-.globl CORDIC
-# Example usage of the macro
-main:
-    l.s $f0, testconst        # Load test angle (theta)
-    CORDIC $f0, $f4, $f6      # Compute cosine in $f4, sine in $f6
-
+# Preconditions: Angle in radians in $f0
+# Postconditions: cos(theta) in $f4
+#                sin(theta) in $f6
+.globl rocketCORDIC
+rocketCORDIC:
+    #l.s $f0, testconst        # Load test angle (theta)
+    CORDIC $f0, $f4, $f6      # Compute cosine in $f4, sine in $f6, of $f0
+    jr $ra
     # li $v0, 2             
     # mov.s $f12, $f4       
     # syscall
