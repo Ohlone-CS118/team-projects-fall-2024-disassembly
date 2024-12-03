@@ -1,6 +1,7 @@
 # Source: https://en.wikipedia.org/wiki/CORDIC
 # Implemented by Mohammed Aziz Quraishi
 
+.include "utilities.asm"
 .data
 arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.062418810,
                      0.031239833, 0.015623729, 0.007812341, 0.003906230, 0.001953123,
@@ -28,6 +29,16 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
     # %sine: Sine value 
 # Macro to perform the entire CORDIC algorithm
 .macro CORDIC(%angle, %cosine, %sine)
+    push($f1)
+    push($f2)
+    push($f3)
+    push($f10)
+    push($f12)
+    push($f20)
+    push($f22)
+    push($f24)
+    push($f26)
+    push($f28)
     # Initialize variables
     l.s $f2, scaling_factor   # x = K (cosine component)
     l.s $f3, flt_zero         # y = 0 (sine component)
@@ -91,6 +102,16 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         # mul.s $f3, $f3, %thrust    # Final sine value scaled
         mov.s %cosine, $f2           # Cosine in %cosine
         mov.s %sine, $f3             # Sine in %sine
+        pop($f28)
+        pop($f26)
+        pop($f24)
+        pop($f22)
+        pop($f20)
+        pop($f12)
+        pop($f10)
+        pop($f3)
+        pop($f2)
+        pop($f1)
 
 .end_macro
 
