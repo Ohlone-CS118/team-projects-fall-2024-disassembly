@@ -29,16 +29,16 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
     # %sine: Sine value 
 # Macro to perform the entire CORDIC algorithm
 .macro CORDIC(%angle, %cosine, %sine)
-    push($f1)
-    push($f2)
-    push($f3)
-    push($f10)
-    push($f12)
-    push($f20)
-    push($f22)
-    push($f24)
-    push($f26)
-    push($f28)
+    pushfloat($f1)
+    pushfloat($f2)
+    pushfloat($f3)
+    pushfloat($f10)
+    pushfloat($f12)
+    pushfloat($f20)
+    pushfloat($f22)
+    pushfloat($f24)
+    pushfloat($f26)
+    pushfloat($f28)
     # Initialize variables
     l.s $f2, scaling_factor   # x = K (cosine component)
     l.s $f3, flt_zero         # y = 0 (sine component)
@@ -102,16 +102,16 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         # mul.s $f3, $f3, %thrust    # Final sine value scaled
         mov.s %cosine, $f2           # Cosine in %cosine
         mov.s %sine, $f3             # Sine in %sine
-        pop($f28)
-        pop($f26)
-        pop($f24)
-        pop($f22)
-        pop($f20)
-        pop($f12)
-        pop($f10)
-        pop($f3)
-        pop($f2)
-        pop($f1)
+        popfloat($f28)
+        popfloat($f26)
+        popfloat($f24)
+        popfloat($f22)
+        popfloat($f20)
+        popfloat($f12)
+        popfloat($f10)
+        popfloat($f3)
+        popfloat($f2)
+        popfloat($f1)
 
 .end_macro
 
