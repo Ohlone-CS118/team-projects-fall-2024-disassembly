@@ -2,8 +2,9 @@
 
 grav_const: .float 9.80
 
-# Postconditiond: %Ax is acceleration in x direction - FPU register 
-# USE FLOATS
+# Calculate Ax
+# Preconditions: %Tx is thrust in x direction as float, %m is mass as float
+# Postconditions: %Ax is acceleration in x direction - FPU register
 .macro Ax(%Ax, %Tx, %m)
     # Ax = Tx/m
     mtc1 %Tx, $f2
@@ -14,6 +15,9 @@ grav_const: .float 9.80
     div.s %Ax, $f2, $f4
 .end_macro
 
+# Calculate Ay
+# Preconditions: %Ty is thrust in y direction as float, %m is mass as float
+# Postconditions: %Ay is acceleration in y direction - FPU register
 .macro Ay(%Ay, %Ty, %m)
     # Ay = (Ty-mg)/m
     mtc1 %m, $f4            # mass -> $f4
@@ -24,14 +28,19 @@ grav_const: .float 9.80
     div.s %Ay, $f8, $f4     # (Ty-mg)/m
 .end_macro
 
-# Preconditions: All input components should be in FPU registers as floats
+# Calculate Vf
+# Preconditions: %a is acceleration in the respective direction, %Vi is initial velocity in the respective direction
+#                All input components should be in FPU registers as floats
+# Postconditions: %Vf is final velocity in respective direction as float
 .macro vel_component(%a, %Vi, %Vf)
     # Vf = Vi + a => Assuming time step of 1
     add.s %Vf, %Vi, %a
 .end_macro
 
+# Calculate Xf and Yf
 # Preconditions: Xi and Yi must be valid integers
 #                Vx and Vy must be calculated from vel_component and remain in FPU
+# Postconditions: %Xf and %Yf are final coordinates of the rocket
 .macro coordinate(%Xi, %Yi, %Vx, %Vy ,%Xf, %Yf)
     cvt.w.s %Vx, %Vx
     cvt.w.s %Vy, %Vy
@@ -47,7 +56,7 @@ grav_const: .float 9.80
 
 .globl rocketMath
 
-main:
+rocketMath:
 
     li $t1, 5
     li $t2, 1000
@@ -57,6 +66,4 @@ main:
     li $v0, 3
     syscall
     
-
-li $v0, 10  # exit safely
-syscall
+    jr $ra
