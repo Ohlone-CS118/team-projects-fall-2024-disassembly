@@ -23,13 +23,13 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .text
 
-
+# Macro to perform the entire CORDIC algorithm
 # Preconditions:
     # %angle: Input angle in radians (in $f0 or other floating-point register)
-# Postcondition:
+# Postconditions:
     # %cosine: Cosine value 
-    # %sine: Sine value 
-# Macro to perform the entire CORDIC algorithm
+    # %sine: Sine value
+    # Blacklisted FPU registers: f1, f2, f4, f10, f12, f20, f22, f24, f26, f28 
 .macro CORDIC(%angle, %cosine, %sine)
     pushfloat($f1)
     pushfloat($f2)

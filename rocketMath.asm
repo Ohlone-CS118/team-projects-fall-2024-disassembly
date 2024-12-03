@@ -8,6 +8,7 @@ grav_const: .float 9.80
 # Preconditions: Angle in radians, T as integer
 # Postconditions: Tx in FPU register
 #                 Ty in FPU register
+# Blacklisted FPU registers: f2, f4, f6
 .macro thrust_components(%Tx, %Ty, %T, %angle)
     pushfloat($f2)
     pushfloat($f4)
@@ -29,6 +30,7 @@ grav_const: .float 9.80
 # Calculate Ax
 # Preconditions: %Tx is thrust in x direction as float in FPU, %m is mass
 # Postconditions: %Ax is acceleration in x direction in FPU register
+# Blacklisted FPU registers: f4
 .macro Ax(%Ax, %Tx, %m)
     #pushfloat($f2)
     pushfloat($f4)
@@ -48,6 +50,7 @@ grav_const: .float 9.80
 # Calculate Ay
 # Preconditions: %Ty is thrust in y direction as float in FPU, %m is mass
 # Postconditions: %Ay is acceleration in y direction in FPU register
+# Blacklisted FPU registers: f4, f6
 .macro Ay(%Ay, %Ty, %m)
     pushfloat($f4)
     pushfloat($f6)
@@ -73,6 +76,7 @@ grav_const: .float 9.80
 # Preconditions: %a is acceleration in the respective direction, %Vi is initial velocity in the respective direction
 #                All input components should be in FPU registers as floats
 # Postconditions: %Vf is final velocity in respective direction as float
+# Blacklisted FPU registers: none
 .macro vel_component(%a, %Vi, %Vf)
     # Vf = Vi + a => Assuming time step of 1
     add.s %Vf, %Vi, %a
@@ -83,6 +87,7 @@ grav_const: .float 9.80
 #                Vx and Vy must be calculated from vel_component and remain in FPU
 # Postconditions: %Xf and %Yf are final coordinates of the rocket
 #                 %dt is the time it takes to get to final coordinate (float)
+# Blacklisted FPU registers: f2, f4, f6, f8
 .macro coordinate(%Xi, %Yi, %Vx, %Vy, %Xf, %Yf, %dt)
     pushfloat($f2)
     pushfloat($f4)
@@ -137,8 +142,6 @@ grav_const: .float 9.80
 .globl rocketMath
 
 rocketMath:
-    push($ra)
-
     # $f0 = angle
     # $t1 = thrust
     # $t2 = mass
@@ -161,5 +164,4 @@ rocketMath:
     # Determine next pixel
     coordinate($a2, $a3, $f12, $f14, $a0, $a1, $f16)  # New x in $a0, new y in $a1, time in $f16
 
-    pop($ra)
     jr $ra
