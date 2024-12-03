@@ -1,45 +1,71 @@
+.include "rocketCORDIC.asm"
 .include "utilities.asm"
 
 .data
 
 grav_const: .float 9.80
 
-# Calculate Ax
-# Preconditions: %Tx is thrust in x direction as float, %m is mass as float
-# Postconditions: %Ax is acceleration in x direction - FPU register
-.macro Ax(%Ax, %Tx, %m)
+# Calculate components of thrust
+# Preconditions: Angle in radians, T as integer
+# Postconditions: Tx in FPU register
+#                 Ty in FPU register
+.macro thrust_components(%Tx, %Ty, %T, %angle)
     pushfloat($f2)
     pushfloat($f4)
+    pushfloat($f6)
 
-    # Ax = Tx/m
-    mtc1 %Tx, $f2
-    mtc1 %m, $f4
+    CORDIC %angle, $f4, $f6
+
+    mtc1 %T, $f2
     cvt.s.w $f2, $f2
-    cvt.s.w $f4, $f4
-    
-    div.s %Ax, $f2, $f4
-    
+
+    mul.s %Tx, $f2, $f4
+    mul.s %Ty, $f2, $f6
+
+    popfloat($f6)
     popfloat($f4)
     popfloat($f2)
 .end_macro
 
+# Calculate Ax
+# Preconditions: %Tx is thrust in x direction as float in FPU, %m is mass
+# Postconditions: %Ax is acceleration in x direction in FPU register
+.macro Ax(%Ax, %Tx, %m)
+    #pushfloat($f2)
+    pushfloat($f4)
+
+    # Ax = Tx/m
+    #mtc1 %Tx, $f2
+    mtc1 %m, $f4
+    #cvt.s.w $f2, $f2
+    cvt.s.w $f4, $f4
+    
+    div.s %Ax, %Tx, $f4
+    
+    popfloat($f4)
+    #popfloat($f2)
+.end_macro
+
 # Calculate Ay
-# Preconditions: %Ty is thrust in y direction as float, %m is mass as float
-# Postconditions: %Ay is acceleration in y direction - FPU register
+# Preconditions: %Ty is thrust in y direction as float in FPU, %m is mass
+# Postconditions: %Ay is acceleration in y direction in FPU register
 .macro Ay(%Ay, %Ty, %m)
     pushfloat($f4)
     pushfloat($f6)
-    pushfloat($f8)
+    #pushfloat($f8)
 
     # Ay = (Ty-mg)/m
     mtc1 %m, $f4            # mass -> $f4
+    #mtc1 %Ty, $f8           # Thrust -> $f8
+    cvt.s.w $f4, $f4
+    #cvt.s.w $f8, $f8
+    
     l.s $f6, grav_const     # gravitational constant -> $f6
     mul.s $f6, $f4, $f6     # mass * gravity
-    mtc1 %Ty, $f8           # Thrust -> $f8
-    sub.s $f8, $f8, $f6     # Thrust - (mg)
-    div.s %Ay, $f8, $f4     # (Ty-mg)/m
+    sub.s %Ty, %Ty, $f6     # Thrust - (mg)
+    div.s %Ay, %Ty, $f4     # (Ty-mg)/m
     
-    popfloat($f8)
+    #popfloat($f8)
     popfloat($f6)
     popfloat($f4)
 .end_macro
@@ -61,8 +87,8 @@ grav_const: .float 9.80
     cvt.w.s %Vx, %Vx
     cvt.w.s %Vy, %Vy
 
-    mtc0 $s0, %Vx
-    mtc0 $s1, %Vy
+    mtc0 %Vx, $s0
+    mtc0 %Vy, $s1
 
     add %Xf, %Xi, $s0
     add %Yf, %Yi, $s1
@@ -74,12 +100,18 @@ grav_const: .float 9.80
 
 rocketMath:
 
-    li $t1, 5
-    li $t2, 1000
+    # $f0 = angle
+    # $t1 = thrust
+    # $t2 = mass
+    # $a2 = initial x coordinate
+    # $a3 = initial y coordinate
+    # $a0 = final x coordinate
+    # $a1 = final y coordinate
 
-    Ax($f12, $t1, $t2)
 
-    li $v0, 3
-    syscall
+    thrust_components($f8, $f10, $t1, $f0)
+
+    Ax($f4, $t1, $t2)
+    Ay($f6, $t1, $t2)
 
     jr $ra

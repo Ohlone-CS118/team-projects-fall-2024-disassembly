@@ -116,17 +116,3 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         popfloat($f1)
 
 .end_macro
-
-# Preconditions: Angle in radians in $f0
-# Postconditions: cos(theta) in $f4
-#                sin(theta) in $f6
-.globl rocketCORDIC
-rocketCORDIC:
-    #l.s $f0, testconst        # Load test angle (theta)
-    CORDIC $f0, $f4, $f6      # Compute cosine in $f4, sine in $f6, of $f0
-    jr $ra
-    # li $v0, 2             
-    # mov.s $f12, $f4       
-    # syscall
-    # mov.s $f12, $f6
-    # syscall
