@@ -1,3 +1,5 @@
+.include "utilities.asm"
+
 .data
 
 grav_const: .float 9.80
@@ -6,6 +8,9 @@ grav_const: .float 9.80
 # Preconditions: %Tx is thrust in x direction as float, %m is mass as float
 # Postconditions: %Ax is acceleration in x direction - FPU register
 .macro Ax(%Ax, %Tx, %m)
+    pushfloat($f2)
+    pushfloat($f4)
+
     # Ax = Tx/m
     mtc1 %Tx, $f2
     mtc1 %m, $f4
@@ -13,12 +18,19 @@ grav_const: .float 9.80
     cvt.s.w $f4, $f4
     
     div.s %Ax, $f2, $f4
+    
+    popfloat($f4)
+    popfloat($f2)
 .end_macro
 
 # Calculate Ay
 # Preconditions: %Ty is thrust in y direction as float, %m is mass as float
 # Postconditions: %Ay is acceleration in y direction - FPU register
 .macro Ay(%Ay, %Ty, %m)
+    pushfloat($f4)
+    pushfloat($f6)
+    pushfloat($f8)
+
     # Ay = (Ty-mg)/m
     mtc1 %m, $f4            # mass -> $f4
     l.s $f6, grav_const     # gravitational constant -> $f6
@@ -26,6 +38,10 @@ grav_const: .float 9.80
     mtc1 %Ty, $f8           # Thrust -> $f8
     sub.s $f8, $f8, $f6     # Thrust - (mg)
     div.s %Ay, $f8, $f4     # (Ty-mg)/m
+    
+    popfloat($f8)
+    popfloat($f6)
+    popfloat($f4)
 .end_macro
 
 # Calculate Vf
@@ -65,5 +81,5 @@ rocketMath:
 
     li $v0, 3
     syscall
-    
+
     jr $ra
