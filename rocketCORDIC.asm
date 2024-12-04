@@ -14,6 +14,7 @@ scaling_factor: .float 0.607252935 # Scaling factor K
 
 flt_neg_one: .float -1.0
 flt_one: .float 1.0
+flt_half: .float 0.5
 flt_zero: .float 0.0
 
 pi: .float 3.14159265
