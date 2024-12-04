@@ -28,10 +28,15 @@ syscall
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
 
+beq $k1, level_one
 
+beq $k1, exit
+
+j level_one_prompt_loop
 
 
 # LEVEL 1
+level_one:
 
 la $a0, level_one_message
 syscall
