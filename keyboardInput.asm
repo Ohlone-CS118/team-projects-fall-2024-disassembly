@@ -15,9 +15,9 @@
 
 .text
 
-.globl main
+.globl keyboard
 
-main:
+keyboard:
     # li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
        	
 	# addi $s1, $s0, 1 	# Trigger an arithmetic overflow exception. 
