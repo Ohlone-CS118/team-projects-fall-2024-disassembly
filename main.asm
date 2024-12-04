@@ -5,7 +5,7 @@
 # strings temporarily stored here
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
-welcome_prompt: .asciiz "\n\nWould you like to participate? Type Y or N for your response: "
+welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
 retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
 exit_message: .asciiz "\n\nExiting program..."
 level_one_message: .asciiz "\nLevel 1: \n\n"
@@ -210,34 +210,12 @@ __keyboard_interrupt:
 	move $a0, $k1 
 	syscall       
 
-    beq $k1, 'w', wInput
-    beq $k1, 'a', aInput
-    beq $k1, 's', sInput
-    beq $k1, 'd', dInput
-    beq $k1, 'y', yInput
-    beq $k1, 'n', nInput
-    beq $k1, '\n', endlInput
+
+beq $k1, '1', level_one
+beq $k1, '0', exit
+
     
-wInput:
-j __resume
-aInput:
-j __resume
-sInput:
-j __resume
-dInput:
-j __resume
-yInput:
-li $v0, 11
-la $a0, '1'
-syscall
-j __resume
-nInput:
-li $v0, 11
-la $a0, '2'
-syscall
-j __resume
-endlInput:
-j __resume
+
 	
 j __resume
 	
@@ -277,16 +255,12 @@ syscall
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
 
-beq $k1, 'y', level_one
-
-beq $k1, 'n', exit
-
 j level_one_prompt_loop
 
 
 # LEVEL 1
 level_one:
-
+li $v0, 4
 la $a0, level_one_message
 syscall
 
