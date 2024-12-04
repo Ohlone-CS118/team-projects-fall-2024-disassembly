@@ -10,7 +10,7 @@ millisecond: .float 1000
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
 welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
-#retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
+retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
 #exit_message: .asciiz "\n\nExiting program..."
 level_one_message: .asciiz "\nLevel 1: \n\n"
 fail_message: .asciiz "\nLevel Failed\n"
@@ -64,7 +64,7 @@ level_one:
 	la $a0, level_one_message
 	syscall
 
-#jal background
+	jal background
 
 	l.s $f0, angle # Load angle into $f0
 	li $t1, 400       # Load starting thrust into $t1
@@ -117,6 +117,13 @@ out_of_bounds:
 	li $v0, 4
 	la $a0, fail_message
 	syscall
+	la $a0, retry_prompt
+	syscall
+
+	# loop to check if user entered Y, N, enter
+retry_prompt_loop:
+	# waiting for input
+	j retry_prompt_loop
 
 exit:
 	li $v0, 10      #exit safely
