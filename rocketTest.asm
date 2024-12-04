@@ -18,8 +18,6 @@ msg_t:  .asciiz "Time to next pixel: "
 
 .text
 
-.globl main
-
 main:
     # Load test values
     l.s $f0, test_angle       # Load angle into $f0
