@@ -102,12 +102,16 @@ flt_threshold: .float 0.5
 
     # Threshold for significant movement
     l.s $f2, flt_threshold      # Threshold for movement decision (e.g., 0.5)
-    l.s $f3, flt_zero
+
+    # Initialize Xf and Yf to current position
+    move %Xf, %Xi               # Default Xf = Xi
+    move %Yf, %Yi               # Default Yf = Yi
 
     # Determine X movement
-    c.le.s $f2, $f6             # Check if |Vx| >= threshold
+    abs.s $f4, $f6              # |Normalized Vx|
+    c.le.s $f2, $f4             # Check if |Vx| >= threshold
     bc1f skip_x_movement        # Skip X movement if below threshold
-    c.lt.s %Vx, $f3             # Check if Vx < 0
+    c.lt.s %Vx, $f2             # Check if Vx < 0
     bc1t move_left              # Move left if true
     addi %Xf, %Xi, 1            # Move right
     j done_x_movement
@@ -117,12 +121,12 @@ move_left:
 
 done_x_movement:
 skip_x_movement:
-    move %Xf, %Xi               # No movement in X
 
     # Determine Y movement
-    c.le.s $f2, $f8             # Check if |Vy| >= threshold
+    abs.s $f4, $f8              # |Normalized Vy|
+    c.le.s $f2, $f4             # Check if |Vy| >= threshold
     bc1f skip_y_movement        # Skip Y movement if below threshold
-    c.lt.s %Vy, $f3             # Check if Vy < 0
+    c.lt.s %Vy, $f2             # Check if Vy < 0
     bc1t move_down              # Move down if true
     addi %Yf, %Yi, 1            # Move up
     j done_y_movement
@@ -132,7 +136,6 @@ move_down:
 
 done_y_movement:
 skip_y_movement:
-    move %Yf, %Yi               # No movement in Y
 
     coordinate_done:
         popfloat($f8)
