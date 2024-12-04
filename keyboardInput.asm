@@ -26,7 +26,7 @@ main:
 
 	# Enable keyboard interrupts. 
 
-	li $s2, $zero # set hold counter to 0
+	move $s2, $zero # set hold counter to 0
 	
 	
   	
