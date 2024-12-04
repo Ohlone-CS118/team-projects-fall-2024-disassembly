@@ -152,10 +152,10 @@ rocketMath:
     # $f0 = angle
     # $t1 = thrust
     # $t2 = mass
-    # $a0 = initial x coordinate
-    # $a1 = initial y coordinate
-    # $t3 = final x coordinate
-    # $t4 = final y coordinate
+    # $t4 = initial x coordinate
+    # $t5 = initial y coordinate
+    # $t6 = final x coordinate
+    # $t7 = final y coordinate
     # $f16 = time to next pixel
 
     # Calculate thrust components in x and y direction
