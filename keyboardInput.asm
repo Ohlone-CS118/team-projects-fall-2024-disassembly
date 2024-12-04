@@ -1,5 +1,5 @@
-.data
-radianoffset: .float 0.392699 #22.5 degrees
+
+.globl __resume
 
 ###############################################################################
 # KERNEL DATA SEGMENT
@@ -150,31 +150,10 @@ __keyboard_interrupt:
 beq $k1, '1', level_one
 beq $k1, '0', exit
 
-beq $k1, 'w', wInput
-beq $k1, 'a', aInput
-beq $k1, 's', sInput
-beq $k1, 'd', dInput
-    
-wInput:
-addi $t1, $t1, 10
-j __resume
-
-aInput:
-l.s $f30, radianoffset
-add.s $f16, $f16, $f30
-j __resume
-
-sInput:
-ble $t1, $zero, sInputSkip
-subi $t1, $t1, 10
-sInputSkip:
-j __resume
-
-dInput:
-l.s $f30, radianoffset
-sub.s $f16, $f16, $f30
-j __resume
-
+#beq $k1, 'w', wInput
+#beq $k1, 'a', aInput
+#beq $k1, 's', sInput
+#beq $k1, 'd', dInput
     
 # example for holding detection
 beq $k1, '2', pressed2 # if key 2 is being pressed
@@ -188,6 +167,27 @@ held2:
 #held2 content
 
 ###
+
+#wInput:
+#addi $t1, $t1, 10
+#j __resume
+
+#aInput:
+#l.s $f30, radianoffset
+#add.s $f16, $f16, $f30
+#j __resume
+
+#sInput:
+#ble $t1, $zero, sInputSkip
+#subi $t1, $t1, 10
+#sInputSkip:
+#j __resume
+
+#dInput:
+#l.s $f30, radianoffset
+#sub.s $f16, $f16, $f30
+#j __resume
+
 j __resume
 	
 

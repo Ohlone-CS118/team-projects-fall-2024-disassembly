@@ -3,7 +3,7 @@
 .include "utilities.asm"
 
 .data
-
+radianoffset: .float 0.392699 #22.5 degrees
 angle: .float 1.5708    # 90 degrees in radians
 millisecond: .float 1000
 
@@ -12,7 +12,7 @@ welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue,
 #retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
 #exit_message: .asciiz "\n\nExiting program..."
 level_one_message: .asciiz "\nLevel 1: \n\n"
-#fail_message: .asciiz "\nLevel Failed\n"
+fail_message: .asciiz "\nLevel Failed\n"
 #success_message: .asciiz "\nLevel Complete\n"
 
 .text
@@ -23,6 +23,10 @@ main:
 
 .globl level_one
 .globl exit
+#.globl wInput
+#.globl aInput
+#.globl sInput
+#.globl dInput
 
 	move $s2, $zero # set hold counter to 0
 	li $s3, 4	# predefined length to be counted as holding
@@ -40,24 +44,24 @@ main:
 	sw $s1, 0xffff0000	# Update the memory mapped receiver control register.
 
 
-li $v0, 4
-la $a0, welcome_message
-syscall
+	li $v0, 4
+	la $a0, welcome_message
+	syscall
 
-la $a0, welcome_prompt
-syscall
+	la $a0, welcome_prompt
+	syscall
 
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
 # waiting for input
-j level_one_prompt_loop
+	j level_one_prompt_loop
 
 
 # LEVEL 1
 level_one:
-li $v0, 4
-la $a0, level_one_message
-syscall
+	li $v0, 4
+	la $a0, level_one_message
+	syscall
 
 #jal background
 
@@ -67,12 +71,12 @@ syscall
 
 	li $t4, 10	# starting coords
 	li $t5, 5
-
-level_one_loop:
-
+	
 	# draw rocket
 	li $a2, DARK_GREEN
 	jal redraw_rocket
+
+level_one_loop:
 	# calculate
 	jal rocketMath
 	
@@ -92,18 +96,47 @@ level_one_loop:
 	move $t4, $t6 # set $t4 to $t6 (set x coord to new x)
 	move $t5, $t7 # set $t5 to $t7 (set y coord to new y)
 	
+	# error collision
+	#if out of bounds collision, end loop, level failed
+	blt $t5, 1, out_of_bounds
+	bgt $t5, 32, out_of_bounds
+	blt $t4, 0, out_of_bounds
+	bgt $t4, 63, out_of_bounds
+	
+	#if incorrect building collision, end loop, level failed
+    	#if correct building collision, end loop, level succeeded
+	
 	
 	li $a2, DARK_GREEN
-	jal redraw_rocket # draw rocket at new coodinates
+	jal redraw_rocket # draw rocket at new coodinates  
 
-# error collision
-    #if out of bounds collision, end loop, level failed
-    #if incorrect building collision, end loop, level failed
-    #if correct building collision, end loop, level succeeded
+	j level_one_loop
 
-j level_one_loop
+out_of_bounds:
+	li $v0, 4
+	la $a0, fail_message
+	syscall
 
 exit:
+	li $v0, 10      #exit safely
+	syscall
 
-li $v0, 10      #exit safely
-syscall
+#wInput:
+#addi $t1, $t1, 10
+#j __resume
+
+#aInput:
+#l.s $f30, radianoffset
+#add.s $f16, $f16, $f30
+#j __resume
+
+#sInput:
+#ble $t1, $zero, sInputSkip
+#subi $t1, $t1, 10
+#sInputSkip:
+#j __resume
+
+#dInput:
+#l.s $f30, radianoffset
+#sub.s $f16, $f16, $f30
+#j __resume
