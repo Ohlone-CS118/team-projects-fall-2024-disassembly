@@ -28,9 +28,9 @@ syscall
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
 
-beq $k1, y, level_one
+beq $k1, 'y', level_one
 
-beq $k1, n, exit
+beq $k1, 'n', exit
 
 j level_one_prompt_loop
 
