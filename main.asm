@@ -26,11 +26,24 @@ la $a0, welcome_prompt
 syscall
 
 # loop to check if user entered Y, N, enter
+j keyboard
 
-# user entered N
-#j exit
+beq $k1, 'y', mainYes
 
-# user entered Y
+beq $k1, 'n', mainNo
+
+
+mainNo:
+li $v0, 11
+la $a0, '1'
+syscall
+
+mainYes:
+li $v0, 11
+la $a0, '2'
+syscall
+
+
 
 # LEVEL 1
 
