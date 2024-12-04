@@ -1,27 +1,5 @@
 .include "utilities.asm"
 
-.data
-
-define:
-# screen information
-	.eqv PIXEL_SIZE 4
-	.eqv WIDTH 64
-	.eqv HEIGHT 32
-	.eqv DISPLAY 0x10010000
-
-# the colors used in my artwork
-	.eqv BLACK	0x00000000
-	.#eqv ORANGE	0x00FF8000
-	.eqv YELLOW	0x00FFFF00
-	#.eqv WHITE	0x00FFFFFF
-	#.eqv GREY	0x00808080
-	#.eqv BLUE	0x003399FF
-	.eqv GREEN	0x0000CC00
-	#.eqv BROWN	0x00663300
-	#.eqv RED		0x00FF0000
-	.eqv SHADEDBLUE	0x00CCCCFF	
-	.eqv DARK_GREEN 0x00003300
-	
 .text
 
 .globl background
@@ -69,22 +47,22 @@ background:
 	li $a2, YELLOW	# color
 	li $a0, 59	# x-coordinate 
 	li $a1, 18	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 60	# x-coordinate 
 	li $a1, 18	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 59	# x-coordinate 
 	li $a1, 20	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 59	# x-coordinate 
 	li $a1, 20	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 60	# x-coordinate 
 	li $a1, 22	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 60	# x-coordinate 
 	li $a1, 22	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	
 	#######################################################
 	# BUILDING 2
@@ -106,28 +84,28 @@ background:
 	li $a2, YELLOW      # color
 	li $a0, 49	# x-coordinate 
 	li $a1, 15	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 50	# x-coordinate 
 	li $a1, 15	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 48	# x-coordinate 
 	li $a1, 17	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 48	# x-coordinate 
 	li $a1, 18	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 50	# x-coordinate 
 	li $a1, 19	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 50	# x-coordinate 
 	li $a1, 20	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 48	# x-coordinate 
 	li $a1, 22	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 50	# x-coordinate 
 	li $a1, 24	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 		
 	#######################################################
 	# BUILDING 3
@@ -149,37 +127,37 @@ background:
 	li $a2, YELLOW      # color
 	li $a0, 40	# x-coordinate 
 	li $a1, 15	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 42	# x-coordinate 
 	li $a1, 15	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 40	# x-coordinate 
 	li $a1, 17	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 42	# x-coordinate 
 	li $a1, 17	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 40	# x-coordinate 
 	li $a1, 19	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 42	# x-coordinate 
 	li $a1, 19	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 40	# x-coordinate 
 	li $a1, 22	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 40	# x-coordinate 
 	li $a1, 23	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 42	# x-coordinate 
 	li $a1, 23	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 42	# x-coordinate 
 	li $a1, 24	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	li $a0, 42	# x-coordinate 
 	li $a1, 25	# y-coordinate
-	jal draw_pixel	# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	
 	#######################################################
 	# BUILDING 4
@@ -201,46 +179,46 @@ background:
 	li $a2, YELLOW      	# color
 	li $a0, 31		# x-coordinate 
 	li $a1, 10		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 31		# x-coordinate 
 	li $a1, 11		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 31		# x-coordinate 
 	li $a1, 13		# y-coordinate
-	jal draw_pixel		# calls draw_pixel	
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel	
 	li $a0, 32		# x-coordinate 
 	li $a1, 13		# y-coordinate
-	jal draw_pixel		# calls draw_pixel	
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel	
 	li $a0, 33		# x-coordinate 
 	li $a1, 13		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 31		# x-coordinate 
 	li $a1, 15		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 33		# x-coordinate 
 	li $a1, 15		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 31		# x-coordinate 
 	li $a1, 17		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 33		# x-coordinate 
 	li $a1, 17		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 32		# x-coordinate 
 	li $a1, 19		# y-coordinate
-	jal draw_pixel		# calls draw_pixel	
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel	
 	li $a0, 32		# x-coordinate 
 	li $a1, 20		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 33		# x-coordinate 
 	li $a1, 19		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 31		# x-coordinate 
 	li $a1, 22		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 31		# x-coordinate 
 	li $a1, 23		# y-coordinate
-	jal draw_pixel		# calls draw_pixel	
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel	
 	
 	#######################################################
 	# BUILDING 5
@@ -262,25 +240,25 @@ background:
 	li $a2, YELLOW      	# color
 	li $a0, 22		# x-coordinate 
 	li $a1, 20		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 23		# x-coordinate 
 	li $a1, 20		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 24		# x-coordinate 
 	li $a1, 22		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 24		# x-coordinate 
 	li $a1, 23		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 22		# x-coordinate 
 	li $a1, 23		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 22		# x-coordinate 
 	li $a1, 24		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	li $a0, 22		# x-coordinate 
 	li $a1, 25		# y-coordinate
-	jal draw_pixel		# calls draw_pixel
+	draw_pixel($a0, $a1, $a2)		# calls draw_pixel
 	
 	pop($ra)
 	pop($t1)
@@ -305,18 +283,7 @@ paintLoop:
 	addi $s0, $s0, 4	# Moving it to the next address
 	blt $s0, $s2, paintLoop	# Looping while $s0 is less than $s2
 	jr $ra
-	
-# Preconditons:
-#	$a0 = x
-#	$a1 = y
-#	$a2 = color
-draw_pixel:
-	mul $s1, $a1, WIDTH	# the product from (y * WIDTH)
-	add $s1, $a0, $s1	# (x + (y * WIDTH))
-	mul $s1, $s1, 4	# 4 * (x + (y * WIDTH)), 4 bytes in one word
-	sw $a2, DISPLAY($s1)
-	jr $ra
-	
+
 # Preconditions: 
 #	$a0 = starting x 
 #	$a1 = y 
@@ -329,8 +296,7 @@ draw_vertical_line:
 	add $s1, $s1, DISPLAY # $s1 = DISPLAY + 4 * (x + (y * WIDTH))
 	li $t1, WIDTH
 	mul $t1, $t1, 4       # $t1 = WIDTH * 4
-	li $t0, 0             # Loop counter for number of pixels
-	
+	li $t0, 0             # Loop counter for number of pixels	
 draw_vertical_loop:
 	sw $a2, 0($s1)        # Store color in memory address
 	add $s1, $s1, $t1     # Move to the next row (increment by WIDTH * 4 bytes)
@@ -350,8 +316,8 @@ draw_horizontal_line:
 	add $s1, $s1, DISPLAY  # $s1 = DISPLAY + ((y * WIDTH) + x) * 4 => pixel address
 	li $t0, 0              # Loop counter (number of pixels drawn)
 draw_horizontal_loop:
-	sw $a2, 0($s1)         		# Store the color in the current pixel's address
-	addi $s1, $s1, 4       		# Move to the next pixel horizontally (4 bytes per pixel)
-	addi $t0, $t0, 1       		# Increment loop counter
+	sw $a2, 0($s1)         # Store the color in the current pixel's address
+	addi $s1, $s1, 4       # Move to the next pixel horizontally (4 bytes per pixel)
+	addi $t0, $t0, 1       # Increment loop counter
 	blt $t0, $a3, draw_horizontal_loop # Continue drawing until the specified number of pixels
 	jr $ra
