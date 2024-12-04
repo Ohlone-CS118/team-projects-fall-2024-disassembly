@@ -14,6 +14,9 @@
 ###############################################################################
 
 .text
+
+.globl main
+
 main:
     # li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
        	
