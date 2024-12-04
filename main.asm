@@ -28,21 +28,6 @@ syscall
 # loop to check if user entered Y, N, enter
 j keyboard
 
-beq $k1, 'y', mainYes
-
-beq $k1, 'n', mainNo
-
-
-mainNo:
-li $v0, 11
-la $a0, '1'
-syscall
-
-mainYes:
-li $v0, 11
-la $a0, '2'
-syscall
-
 
 
 # LEVEL 1

@@ -204,12 +204,25 @@ __keyboard_interrupt:
     beq $k1, '\n', endlInput
     
 wInput:
+j __resume
 aInput:
+j __resume
 sInput:
+j __resume
 dInput:
+j __resume
 yInput:
+li $v0, 11
+la $a0, '1'
+syscall
+j __resume
 nInput:
+li $v0, 11
+la $a0, '2'
+syscall
+j __resume
 endlInput:
+j __resume
 	
 j __resume
 	
