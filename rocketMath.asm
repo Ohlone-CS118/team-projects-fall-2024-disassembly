@@ -3,6 +3,7 @@
 .data
 
 grav_const: .float 9.80
+flt_threshold: .float 0.5
 
 # Calculate components of thrust
 # Preconditions: Angle in radians, T as integer
@@ -86,41 +87,52 @@ grav_const: .float 9.80
     pushfloat($f8)
     
     # Calculate velocity magnitude: sqrt(Vx^2 + Vy^2)
-    mul.s $f2, %Vx, %Vx        # Vx^2
-    mul.s $f4, %Vy, %Vy        # Vy^2
-    add.s $f6, $f2, $f4        # Vx^2 + Vy^2
-    sqrt.s $f8, $f6            # Magnitude = sqrt(Vx^2 + Vy^2)
+    mul.s $f2, %Vx, %Vx         # Vx^2
+    mul.s $f4, %Vy, %Vy         # Vy^2
+    add.s $f6, $f2, $f4         # Vx^2 + Vy^2
+    sqrt.s $f8, $f6             # Magnitude = sqrt(Vx^2 + Vy^2)
 
     # Calculate time to travel 1 meter: t = 1 / Magnitude
-    l.s $f2, flt_one           # Distance to next pixel = 1 meter
-    div.s %dt, $f2, $f8        # t = 1 / Magnitude
+    l.s $f2, flt_one            # Distance to next pixel = 1 meter
+    div.s %dt, $f2, $f8         # t = 1 / Magnitude
 
     # Normalize velocity components
-    div.s $f6, %Vx, $f8        # Normalized Vx
-    div.s $f8, %Vy, $f8        # Normalized Vy
+    div.s $f6, %Vx, $f8         # Normalized Vx
+    div.s $f8, %Vy, $f8         # Normalized Vy
 
-    # Determine direction of movement
-    l.s $f2, flt_zero           # Load 0
-    
-    check_x_direction:
-        c.lt.s $f6, $f2            # Check if Vx < 0
-        bc1t move_left_or_down     # If true, move left or diagonal down
-        addi %Xf, %Xi, 1           # Otherwise, move right
+    # Threshold for significant movement
+    l.s $f2, flt_threshold      # Threshold for movement decision (e.g., 0.5)
+    l.s $f3, flt_zero
 
-    check_y_direction:
-        c.lt.s $f8, $f2            # Check if Vy < 0
-        bc1t move_down             # If true, move down
-        addi %Yf, %Yi, 1           # Otherwise, move up
-        j coordinate_done
+    # Determine X movement
+    c.le.s $f2, $f6             # Check if |Vx| >= threshold
+    bc1f skip_x_movement        # Skip X movement if below threshold
+    c.lt.s %Vx, $f3             # Check if Vx < 0
+    bc1t move_left              # Move left if true
+    addi %Xf, %Xi, 1            # Move right
+    j done_x_movement
 
-    move_left_or_down:
-        subi %Xf, %Xi, 1           # Move left
-        c.lt.s $f8, $f2            # Check if Vy < 0
-        bc1t move_down             # If true, continue moving down
-        j coordinate_done
+move_left:
+    subi %Xf, %Xi, 1            # Move left
 
-    move_down:
-        subi %Yf, %Yi, 1           # Move down
+done_x_movement:
+skip_x_movement:
+    move %Xf, %Xi               # No movement in X
+
+    # Determine Y movement
+    c.le.s $f2, $f8             # Check if |Vy| >= threshold
+    bc1f skip_y_movement        # Skip Y movement if below threshold
+    c.lt.s %Vy, $f3             # Check if Vy < 0
+    bc1t move_down              # Move down if true
+    addi %Yf, %Yi, 1            # Move up
+    j done_y_movement
+
+move_down:
+    subi %Yf, %Yi, 1            # Move down
+
+done_y_movement:
+skip_y_movement:
+    move %Yf, %Yi               # No movement in Y
 
     coordinate_done:
         popfloat($f8)
