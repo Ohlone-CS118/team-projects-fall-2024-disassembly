@@ -20,7 +20,7 @@ The core idea behind the CORDIC algorithm is to represent trigonometric function
 
 Given an angle $\theta$ in radians, the goal is to compute the cosine and sine of $\theta$ without using multiplication or division. Instead, the algorithm uses vector rotations in the 2D plane to iteratively converge on the desired angle.
 
-Initially, the algorithm starts with a vector pointing along the x-axis (with coordinates $(x_0, y_0)$ and a direction of $\theta_0 = 0$. The input angle $\theta$ is the angle we want to calculate the sine and cosine for.
+Initially, the algorithm starts with a vector pointing along the x-axis (with coordinates $(x_0, y_0)$ and a direction of $\theta_0 = 0$). The input angle $\theta$ is the angle we want to calculate the sine and cosine for.
 
 ---
 
