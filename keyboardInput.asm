@@ -130,33 +130,33 @@ __exception:
 	
 __unhandled_exception: 
     	
-	li $v0, 4		# Print the unhandled exception notice
-	la $a0, UNHANDLED_EXCEPTION
-	syscall
+	# li $v0, 4		# Print the unhandled exception notice
+	# la $a0, UNHANDLED_EXCEPTION
+	# syscall
  
  	j __resume_from_exception
 	
 __overflow_exception:
 	
-	li $v0, 4		# Print the overflow exception notice
-	la $a0, OVERFLOW_EXCEPTION
-	syscall
+	# li $v0, 4		# Print the overflow exception notice
+	# la $a0, OVERFLOW_EXCEPTION
+	# syscall
  
  	j __resume_from_exception
  	
  __bad_address_exception:
 	
-	li $v0, 4		# Print the bad address exception notice
-	la $a0, BAD_ADDRESS_EXCEPTION
-	syscall
+	# li $v0, 4		# Print the bad address exception notice
+	# la $a0, BAD_ADDRESS_EXCEPTION
+	# syscall
  
  	j __resume_from_exception	
  
 __trap_exception: 
 	
-	li $v0, 4		# Print the bad trap notice
-	la $a0, TRAP_EXCEPTION
-	syscall
+	# li $v0, 4		# Print the bad trap notice
+	# la $a0, TRAP_EXCEPTION
+	# syscall
  
  	j __resume_from_exception
 
@@ -176,9 +176,9 @@ __unhandled_interrupt:
    
   	#  Use the MARS built-in system call 4 (print string) to print error messsage.
 	
-	li $v0, 4		# Print the unhandled Interupt notice
-	la $a0, UNHANDLED_INTERRUPT
-	syscall
+	# li $v0, 4		# Print the unhandled Interupt notice
+	# la $a0, UNHANDLED_INTERRUPT
+	# syscall
  
  	j __resume
 
