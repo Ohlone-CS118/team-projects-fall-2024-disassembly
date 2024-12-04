@@ -30,6 +30,7 @@ keyboard:
 	# Enable keyboard interrupts. 
 
 	move $s2, $zero # set hold counter to 0
+	li $s3, 4	# predefined length to be counted as holding
 	
 	
   	
@@ -215,8 +216,18 @@ beq $k1, '1', level_one
 beq $k1, '0', exit
 
     
+# example for holding detection
+beq $k1, '2', pressed2 # if key 2 is being pressed
 
-	
+pressed2:
+bge $s2, $s3, hold2 # if key 2 is being held
+#pressed2 content
+
+
+held2:
+#held2 content
+
+###
 j __resume
 	
 
