@@ -14,9 +14,8 @@ flt_threshold: .float 0.5
     pushfloat($f2)
     pushfloat($f4)
     pushfloat($f6)
-
-    CORDIC %angle, $f4, $f6
 	
+    CORDIC %angle, $f4, $f6 # Get cos(angle) and sin(angle)
     mtc1 %T, $f2
     cvt.s.w $f2, $f2
 
@@ -35,10 +34,10 @@ flt_threshold: .float 0.5
 .macro Ax(%Ax, %Tx, %m)
     pushfloat($f4)
 
-    # Ax = Tx/m
     mtc1 %m, $f4
     cvt.s.w $f4, $f4
-        
+    
+    # Ax = Tx/m
     div.s %Ax, %Tx, $f4
     
     popfloat($f4)
@@ -52,10 +51,10 @@ flt_threshold: .float 0.5
     pushfloat($f4)
     pushfloat($f6)
 
-    # Ay = (Ty-mg)/m
     mtc1 %m, $f4            # mass -> $f4
     cvt.s.w $f4, $f4
-    
+
+    # Ay = (Ty-mg)/m
     l.s $f6, grav_const     # gravitational constant -> $f6
     mul.s $f6, $f4, $f6     # mass * gravity
     sub.s %Ty, %Ty, $f6     # Thrust - (mg)
@@ -159,9 +158,10 @@ rocketMath:
     # $t4 = final y coordinate
     # $f16 = time to next pixel
 
-
+    # Calculate thrust components in x and y direction
     thrust_components($f8, $f10, $t1, $f0)
 
+    # Calculate Acceleration in x and y direction
     Ax($f1, $f8, $t2)
     Ay($f3, $f10, $t2)
     
