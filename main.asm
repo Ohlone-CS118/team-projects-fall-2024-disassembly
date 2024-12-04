@@ -26,7 +26,6 @@ la $a0, welcome_prompt
 syscall
 
 # loop to check if user entered Y, N, enter
-j keyboard
 
 
 

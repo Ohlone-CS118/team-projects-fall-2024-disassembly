@@ -16,7 +16,6 @@
 .text
 .globl keyboard
 main:
-keyboard:
     # li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
        	
 	# addi $s1, $s0, 1 	# Trigger an arithmetic overflow exception. 
@@ -27,6 +26,8 @@ keyboard:
 
 
 	# Enable keyboard interrupts. 
+
+	li $s2, $zero # set hold counter to 0
 	
 	
   	
@@ -190,6 +191,18 @@ __keyboard_interrupt:
 
 	# Use the MARS built-in system call 11 (print char) to print the character
 	# from receiver data.
+
+	beq $t0, $k1, holdCounter	# if key pressed is the same as previous key pressed
+
+	li $s2, 1 # reset hold counter to 1
+
+	j notHolding	
+
+	holdCounter:
+	addi $s2, $s2, 1		# hold counter++
+
+	notHolding:
+	move $t0, $k1	# save current character to next comparison
 	
 	li $v0, 11 		# print the character entered 
 	move $a0, $k1 
