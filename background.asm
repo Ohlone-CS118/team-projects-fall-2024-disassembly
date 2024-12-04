@@ -270,18 +270,18 @@ background:
 	
 	jr $ra
 	
-# Preconditons:
+# Preconditions:
 #	$a0 = color
 background_color:
-	li $s0, DISPLAY	# set $s0 to starting memory
-	li $s1, WIDTH	# set $s1 to the number of pixels
-	mul $s1, $s1, HEIGHT
-	mul $s1, $s1, 4	# multiplies the size of a word
-	add $s2, $s0, $s1	# set $s2 to the last pixel of memory
-paintLoop:
-	sw $a0, 0($s0)	# Writing the pixel
-	addi $s0, $s0, 4	# Moving it to the next address
-	blt $s0, $s2, paintLoop	# Looping while $s0 is less than $s2
+	li $s1, DISPLAY	# $s1 = the first pixel on the display
+	li $s2, WIDTH	# $s2 = last memory address of the display
+	mul $s2, $s2, HEIGHT
+	mul $s2, $s2, 4	# multiply by amount of bytes in a word
+	add $s2, $s1, $s2	# add $s2 to address of first pixel (gives last memory address)
+backgroundLoop:
+	sw $a0, 0($s1)
+	addi $s1, $s1, 4
+	ble $s1, $s2, backgroundLoop
 	jr $ra
 
 # Preconditions: 
