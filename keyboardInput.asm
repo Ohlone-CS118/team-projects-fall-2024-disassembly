@@ -13,9 +13,8 @@
 # MARS start to execute at label main in the user .text segment.
 ###############################################################################
 
-.globl main
 .text
-
+.globl keyboard
 main:
 keyboard:
        	li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
@@ -196,15 +195,23 @@ __keyboard_interrupt:
 	move $a0, $k1 
 	syscall       
 
-    beq $k1, 'w', wI
-    beq $k1, 'a', aI
-    beq $k1, 's', sI
-    beq $k1, 'd', dI
-    beq $k1, 'y', yI
-    beq $k1, 'n', nI
-    beq $k1, '\n', endlI
+    beq $k1, 'w', wInput
+    beq $k1, 'a', aInput
+    beq $k1, 's', sInput
+    beq $k1, 'd', dInput
+    beq $k1, 'y', yInput
+    beq $k1, 'n', nInput
+    beq $k1, '\n', endlInput
+    
+wInput:
+aInput:
+sInput:
+dInput:
+yInput:
+nInput:
+endlInput:
 	
-	j __resume
+j __resume
 	
 
 __resume_from_exception: 

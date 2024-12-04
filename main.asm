@@ -67,7 +67,6 @@ syscall
 # ^ the whole time, listen to interrupts when the user press w a s d
     # if interrupted: modify respective quantites by the amount of press, then continue
 
-la $a0, 
 
 
 exit:
