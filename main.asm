@@ -199,12 +199,12 @@ __keyboard_interrupt:
 
 beq $k1, '1', level_one
 beq $k1, '0', exit
-
 beq $k1, 'w', wInput
 beq $k1, 'a', aInput
 beq $k1, 's', sInput
 beq $k1, 'd', dInput
 
+j __resume
 
 # LEVEL 1
 level_one:
@@ -269,23 +269,11 @@ out_of_bounds:
 	la $a0, retry_prompt
 	syscall
 
-	# loop to check if user entered 1 or 0
-retry_prompt_loop:
-	# waiting for input
-	j retry_prompt_loop
-
-exit:
-	li $v0, 10      #exit safely
-	syscall
-
 wInput:
 li $t1, 200
-li $v0, 4
-la $a0, fail_message
-syscall
 
 addi $t1, $t1, 10
-eret
+j __resume
 
 aInput:
 li $v0, 11
@@ -293,19 +281,18 @@ la $a0, ']'
 syscall
 l.s $f30, radianoffset
 add.s $f16, $f16, $f30
-eret
+j __resume
 
 sInput:
 ble $t1, $zero, sInputSkip
 subi $t1, $t1, 10
 sInputSkip:
-eret
+j __resume
+
 
 dInput:
 l.s $f30, radianoffset
 sub.s $f16, $f16, $f30
-eret
-
 j __resume
 	
 
@@ -333,3 +320,6 @@ __resume:
 	# (PC) to the value saved in the ECP register (register 14 in coporcessor 0).
 	
 	eret # Look at the value of $14 in Coprocessor 0 before single stepping.
+exit:
+	li $v0, 10      #exit safely
+	syscall
