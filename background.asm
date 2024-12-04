@@ -14,7 +14,7 @@ background:
 	push($ra)
 
 	li $a0, SHADEDBLUE		# this will be a sky blue background
-	jal background_color
+	#jal background_color
 	
 #------------------------------GRASS------------------------------------------#
 	
