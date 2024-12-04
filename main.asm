@@ -223,7 +223,7 @@ beq $k1, '0', exit
 beq $k1, '2', pressed2 # if key 2 is being pressed
 
 pressed2:
-bge $s2, $s3, hold2 # if key 2 is being held
+bge $s2, $s3, held2 # if key 2 is being held
 #pressed2 content
 
 
