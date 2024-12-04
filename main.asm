@@ -10,7 +10,7 @@ millisecond: .float 1000
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
 welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
-retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
+retry_prompt: .asciiz "\n\nWould you like to retry? Press 1 to retry, 0 to exit: "
 #exit_message: .asciiz "\n\nExiting program..."
 level_one_message: .asciiz "\nLevel 1: \n\n"
 fail_message: .asciiz "\nLevel Failed\n"
@@ -120,7 +120,7 @@ out_of_bounds:
 	la $a0, retry_prompt
 	syscall
 
-	# loop to check if user entered Y, N, enter
+	# loop to check if user entered 1 or 0
 retry_prompt_loop:
 	# waiting for input
 	j retry_prompt_loop
