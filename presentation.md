@@ -7,6 +7,106 @@ theme: default
 
 ---
 
+![bg left:40% 80%](https://web.mit.edu/16.unified/www/SPRING/propulsion/notes/fig5RocketFBD_web.jpg)
+
+# Rocket Physics
+This program implements a rudimentary, yet mathematically accurate physics simulation of a rocket using principles of Newtonian Mechanics.
+
+---
+
+## Vectors
+To keep things relatively simple, we have limited the simulation to only utilize two vectors to represent the forces acting on our rocket and calculate its movement:
+
+$$
+\begin{align}
+\vec{T}&:\text{Thrust} \\
+\vec{F_g}&: \text{Gravity}
+\end{align}
+$$
+
+In component form, these vectors are:
+$$
+\begin{align}
+\vec{T}&=T_x\hat i+T_y\hat j\\
+\vec{F_g}&= -mg\hat j
+\end{align}
+$$
+
+---
+## Applying Newton's Second Law
+
+According to Newton's Second Law, the sum of all the forces on an object is equal to the mass of the object multiplied by its acceleration vector, or $\sum{\vec{F}_{net}}=m\vec{a}$.
+
+This remains true when considering the components of these vectors. As such, we can apply this to the forces that act on our rocket:
+
+$$
+\begin{align}
+\vec{T}+\vec{F_g}&=m\vec{a}\\
+\vec{T}_x&=m\vec{a}_x\\
+\vec{T}_y-mg&=m\vec{a}_y
+\end{align}
+$$
+
+---
+
+## Determining Thrust Components
+Using right-triangle trigonometry, we can determine the components of our thrust vector using only the total magnitude of thrust and the angle at which the force is applied.
+
+$$
+\begin{align}
+\vec{T}_x&=Tcos(\theta) \\
+\vec{T}_x&=Tsin(\theta)
+\end{align}
+$$
+
+We calculate sines and cosines using the CORDIC algorithm covered later.
+```MIPS
+CORDIC %angle, $f4, $f6
+mtc1 %T, $f2
+cvt.s.w $f2, $f2
+mul.s %Tx, $f2, $f4     # Tx = T * cos(angle)
+mul.s %Ty, $f2, $f6     # Ty = T * sin(angle)
+```
+
+---
+## Equation Implementation
+Since our goal is to calculate the movement of the rocket, we implement our equations in terms of $\vec{a}$ for each component.
+
+$$
+\begin{align}
+\vec{a}_x = \frac{\vec{T}_x}{m}
+\end{align}
+$$
+```MIPS
+# Ax = Tx/m
+div.s %Ax, %Tx, $f4
+```
+
+$$
+\begin{align}
+\vec{a}_y = \frac{\vec{T}_y-mg}{m}
+\end{align}
+$$
+```MIPS
+l.s $f6, grav_const     # gravitational constant -> $f6
+mul.s $f6, $f4, $f6     # mass * gravity
+sub.s %Ty, %Ty, $f6     # Thrust - (mg)
+div.s %Ay, %Ty, $f4     # (Ty-mg)/m
+```
+---
+
+## Velocity Calculation
+
+The final velocity of the rocket is equal to the initial velocity + acceleration.
+$$V_f=V_i+a$$
+```MIPS
+# Vf = Vi + a => Assuming time step of 1
+add.s %Vf, %Vi, %a
+```
+The components of the final velocity are then used to determine the pixel unit displacement of the rocket.
+
+---
+
 ![bg left:40% 80%](https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/CORDIC-illustration.png/300px-CORDIC-illustration.png)
 
 # CORDIC Algorithm
