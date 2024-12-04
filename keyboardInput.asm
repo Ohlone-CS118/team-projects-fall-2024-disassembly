@@ -150,10 +150,10 @@ __keyboard_interrupt:
 beq $k1, '1', level_one
 beq $k1, '0', exit
 
-#beq $k1, 'w', wInput
-#beq $k1, 'a', aInput
-#beq $k1, 's', sInput
-#beq $k1, 'd', dInput
+beq $k1, 'w', wInput
+beq $k1, 'a', aInput
+beq $k1, 's', sInput
+beq $k1, 'd', dInput
     
 # example for holding detection
 beq $k1, '2', pressed2 # if key 2 is being pressed
@@ -216,5 +216,3 @@ __resume:
 	
 	eret # Look at the value of $14 in Coprocessor 0 before single stepping.
 
-li $v0, 10
-syscall

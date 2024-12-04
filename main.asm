@@ -3,6 +3,7 @@
 .include "utilities.asm"
 
 .data
+keyboard_input: .word 0    # Address for keyboard input (MMIO location)
 radianoffset: .float 0.392699 #22.5 degrees
 angle: .float 1.5708    # 90 degrees in radians
 millisecond: .float 1000
@@ -23,10 +24,10 @@ main:
 
 .globl level_one
 .globl exit
-#.globl wInput
-#.globl aInput
-#.globl sInput
-#.globl dInput
+.globl wInput
+.globl aInput
+.globl sInput
+.globl dInput
 
 	move $s2, $zero # set hold counter to 0
 	li $s3, 4	# predefined length to be counted as holding
@@ -121,22 +122,27 @@ exit:
 	li $v0, 10      #exit safely
 	syscall
 
-#wInput:
-#addi $t1, $t1, 10
-#j __resume
+wInput:
+li $t1, 200
+li $v0, 4
+la $a0, fail_message
+syscall
 
-#aInput:
-#l.s $f30, radianoffset
-#add.s $f16, $f16, $f30
-#j __resume
+addi $t1, $t1, 10
+eret
 
-#sInput:
-#ble $t1, $zero, sInputSkip
-#subi $t1, $t1, 10
-#sInputSkip:
-#j __resume
+aInput:
+l.s $f30, radianoffset
+add.s $f16, $f16, $f30
+eret
 
-#dInput:
-#l.s $f30, radianoffset
-#sub.s $f16, $f16, $f30
-#j __resume
+sInput:
+ble $t1, $zero, sInputSkip
+subi $t1, $t1, 10
+sInputSkip:
+eret
+
+dInput:
+l.s $f30, radianoffset
+sub.s $f16, $f16, $f30
+eret
