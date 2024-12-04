@@ -23,15 +23,15 @@ main:
     l.s $f0, test_angle       # Load angle into $f0
     lw $t1, test_thrust       # Load thrust into $t1
     lw $t2, test_mass         # Load mass into $t2
-    lw $a2, test_Xi           # Load initial X coordinate into $a2
-    lw $a3, test_Yi           # Load initial Y coordinate into $a3
+    lw $a0, test_Xi           # Load initial X coordinate into $a2
+    lw $a1, test_Yi           # Load initial Y coordinate into $a3
 
     # Call rocketMath
     jal rocketMath
 
     # Store results
-    sw $a0, output_Xf         # Store final X coordinate
-    sw $a1, output_Yf         # Store final Y coordinate
+    sw $t3, output_Xf         # Store final X coordinate
+    sw $t4, output_Yf         # Store final Y coordinate
     s.s $f16, output_t        # Store time to next pixel as float
 
      # Print results

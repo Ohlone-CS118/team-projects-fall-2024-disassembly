@@ -153,10 +153,10 @@ rocketMath:
     # $f0 = angle
     # $t1 = thrust
     # $t2 = mass
-    # $a2 = initial x coordinate
-    # $a3 = initial y coordinate
-    # $a0 = final x coordinate
-    # $a1 = final y coordinate
+    # $a0 = initial x coordinate
+    # $a1 = initial y coordinate
+    # $t3 = final x coordinate
+    # $t4 = final y coordinate
     # $f16 = time to next pixel
 
 
@@ -170,6 +170,6 @@ rocketMath:
     vel_component($f3, $f14, $f14) # Ay + Viy = Vfy
 
     # Determine next pixel
-    coordinate($a2, $a3, $f12, $f14, $a0, $a1, $f16)  # New x in $a0, new y in $a1, time in $f16
+    coordinate($a0, $a1, $f12, $f14, $t3, $t4, $f16)  # New x in $t3, new y in $t4, time in $f16
 
     jr $ra
