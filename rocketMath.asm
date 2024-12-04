@@ -170,6 +170,7 @@ rocketMath:
     vel_component($f3, $f14, $f14) # Ay + Viy = Vfy
 
     # Determine next pixel
-    coordinate($a0, $a1, $f12, $f14, $t3, $t4, $f16)  # New x in $t3, new y in $t4, time in $f16
+    #         (%Xi, %Yi, %Vx,  %Vy,  %Xf, %Yf, %dt )
+    coordinate($t4, $t5, $f12, $f14, $t6, $t7, $f16)
 
     jr $ra
