@@ -17,13 +17,13 @@
 .globl keyboard
 main:
 keyboard:
-       	li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
+    # li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
        	
-	addi $s1, $s0, 1 	# Trigger an arithmetic overflow exception. 
+	# addi $s1, $s0, 1 	# Trigger an arithmetic overflow exception. 
 	
-	lw $s0, 0($zero)	# Trigger a bad data address (on load) exception.
+	# lw $s0, 0($zero)	# Trigger a bad data address (on load) exception.
 	
-	teqi $zero, 0 		# Trigger a trap exception. 
+	# teqi $zero, 0 		# Trigger a trap exception. 
 
 
 	# Enable keyboard interrupts. 
