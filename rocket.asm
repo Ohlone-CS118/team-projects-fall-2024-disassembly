@@ -27,17 +27,22 @@ define:
 .globl redraw_rocket
 				
 redraw_rocket:
+    push($ra)
+
 	li $a0, 14        	# x-coordinate
 	li $a1, 48         	# y-coordinate
 	li $a3, 5         	# height of rocket
 	li $a2, SHADEDBLUE     	
-	jal draw_vertical_line
+	#jal draw_vertical_line
 	
 	li $a0, 20        	# x-coordinate
 	li $a1, 48         	# y-coordinate
 	li $a3, 5         	# height of rocket
 	li $a2, DARK_GREEN     	
-	jal draw_vertical_line
+	#jal draw_vertical_line
+
+    pop($ra)
+    jr $ra
 
 horizontal_rocket1:
 	li $a2, DARK_GREEN  # color
