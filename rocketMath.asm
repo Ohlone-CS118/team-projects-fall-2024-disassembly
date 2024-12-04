@@ -15,7 +15,7 @@ grav_const: .float 9.80
     pushfloat($f6)
 
     CORDIC %angle, $f4, $f6
-
+	
     mtc1 %T, $f2
     cvt.s.w $f2, $f2
 
@@ -32,19 +32,15 @@ grav_const: .float 9.80
 # Postconditions: %Ax is acceleration in x direction in FPU register
 # Blacklisted FPU registers: f4
 .macro Ax(%Ax, %Tx, %m)
-    #pushfloat($f2)
     pushfloat($f4)
 
     # Ax = Tx/m
-    #mtc1 %Tx, $f2
     mtc1 %m, $f4
-    #cvt.s.w $f2, $f2
     cvt.s.w $f4, $f4
-    
+        
     div.s %Ax, %Tx, $f4
     
     popfloat($f4)
-    #popfloat($f2)
 .end_macro
 
 # Calculate Ay
@@ -54,20 +50,16 @@ grav_const: .float 9.80
 .macro Ay(%Ay, %Ty, %m)
     pushfloat($f4)
     pushfloat($f6)
-    #pushfloat($f8)
 
     # Ay = (Ty-mg)/m
     mtc1 %m, $f4            # mass -> $f4
-    #mtc1 %Ty, $f8           # Thrust -> $f8
     cvt.s.w $f4, $f4
-    #cvt.s.w $f8, $f8
     
     l.s $f6, grav_const     # gravitational constant -> $f6
     mul.s $f6, $f4, $f6     # mass * gravity
     sub.s %Ty, %Ty, $f6     # Thrust - (mg)
     div.s %Ay, %Ty, $f4     # (Ty-mg)/m
     
-    #popfloat($f8)
     popfloat($f6)
     popfloat($f4)
 .end_macro
@@ -76,7 +68,6 @@ grav_const: .float 9.80
 # Preconditions: %a is acceleration in the respective direction, %Vi is initial velocity in the respective direction
 #                All input components should be in FPU registers as floats
 # Postconditions: %Vf is final velocity in respective direction as float
-# Blacklisted FPU registers: none
 .macro vel_component(%a, %Vi, %Vf)
     # Vf = Vi + a => Assuming time step of 1
     add.s %Vf, %Vi, %a
@@ -93,7 +84,7 @@ grav_const: .float 9.80
     pushfloat($f4)
     pushfloat($f6)
     pushfloat($f8)
-
+    
     # Calculate velocity magnitude: sqrt(Vx^2 + Vy^2)
     mul.s $f2, %Vx, %Vx        # Vx^2
     mul.s $f4, %Vy, %Vy        # Vy^2
@@ -109,6 +100,8 @@ grav_const: .float 9.80
     div.s $f8, %Vy, $f8        # Normalized Vy
 
     # Determine direction of movement
+    l.s $f2, flt_zero           # Load 0
+    
     check_x_direction:
         c.lt.s $f6, $f2            # Check if Vx < 0
         bc1t move_left_or_down     # If true, move left or diagonal down
@@ -154,12 +147,12 @@ rocketMath:
 
     thrust_components($f8, $f10, $t1, $f0)
 
-    Ax($f4, $f8, $t2)
-    Ay($f6, $f10, $t2)
-
+    Ax($f1, $f8, $t2)
+    Ay($f3, $f10, $t2)
+    
     # Update velocities
-    vel_component($f4, $f12, $f12) # Vfx = Vix + Ax
-    vel_component($f6, $f14, $f14) # Vfy = Viy + Ay
+    vel_component($f1, $f12, $f12) # Ax + Vix = Vfx 
+    vel_component($f3, $f14, $f14) # Ay + Viy = Vfy
 
     # Determine next pixel
     coordinate($a2, $a3, $f12, $f14, $a0, $a1, $f16)  # New x in $a0, new y in $a1, time in $f16

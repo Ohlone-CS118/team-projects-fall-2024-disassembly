@@ -41,6 +41,11 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
     pushfloat($f24)
     pushfloat($f26)
     pushfloat($f28)
+    push($t0)
+    push($t1)
+    push($t2)
+    push($a0)
+    push($a1)
     # Initialize variables
     l.s $f2, scaling_factor   # x = K (cosine component)
     l.s $f3, flt_zero         # y = 0 (sine component)
@@ -104,6 +109,11 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         # mul.s $f3, $f3, %thrust    # Final sine value scaled
         mov.s %cosine, $f2           # Cosine in %cosine
         mov.s %sine, $f3             # Sine in %sine
+        pop($a1)
+        pop($a0)
+        pop($t2)
+        pop($t1)
+        pop($t0)
         popfloat($f28)
         popfloat($f26)
         popfloat($f24)

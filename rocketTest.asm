@@ -1,4 +1,3 @@
-.include "rocketMath.asm"
 .data
 
 # Test values
@@ -65,3 +64,4 @@ main:
     # Exit
     li $v0, 10                # Exit syscall
     syscall
+    
