@@ -14,7 +14,6 @@
 ###############################################################################
 
 .text
-.globl keyboard
 main:
     # li $s0, 0x7fffffff  	# The largest 32 bit positive two's complement number.
        	
@@ -27,7 +26,7 @@ main:
 
 	# Enable keyboard interrupts. 
 
-	li $s2, $zero # set hold counter to 0
+	move $s2, $zero # set hold counter to 0
 	
 	
   	
