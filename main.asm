@@ -4,7 +4,7 @@
 # Unit Width in Pixels: 8
 # Unit Height in Pixels: 8
 # Display Width in Pixels: 512
-# Display Height in Pixels: 256
+# Display Height in Pixels: 512
 # Base address for display: 0x10040000 (heap)
 
 .include "utilities.asm"
@@ -129,7 +129,7 @@ level_one_loop:
 	# error collision
 	#if out of bounds collision, end loop, level failed
 	blt yi, 1, out_of_bounds
-	bgt yi, 32, out_of_bounds
+	bgt yi, 63, out_of_bounds
 	blt xi, 0, out_of_bounds
 	bgt xi, 63, out_of_bounds
 	

@@ -22,8 +22,8 @@
 define:
 # screen information
 	.eqv PIXEL_SIZE 4
-	.eqv WIDTH 64
-	.eqv HEIGHT 32
+	.eqv WIDTH 64 # 64
+	.eqv HEIGHT 64 # 32
 	.eqv DISPLAY 0x10040000
 
 # the colors used in my artwork
@@ -34,7 +34,7 @@ define:
 	#.eqv GREY	0x00808080
 	#.eqv BLUE	0x003399FF
 	.eqv GREEN	0x0000CC00
-	#.eqv BROWN	0x00663300
+	.eqv BROWN	0x00663300
 	#.eqv RED		0x00FF0000
 	.eqv SHADEDBLUE	0x00CCCCFF	
 	.eqv DARK_GREEN 0x00003300
