@@ -5,6 +5,7 @@
 grav_const: .float 9.80
 flt_threshold: .float 0.5
 
+
 # Calculate components of thrust
 # Preconditions: Angle in radians, T as integer
 # Postconditions: Tx in FPU register
@@ -78,12 +79,17 @@ flt_threshold: .float 0.5
 #                Vx and Vy must be calculated from vel_component and remain in FPU
 # Postconditions: %Xf and %Yf are final coordinates of the rocket
 #                 %dt is the time it takes to get to final coordinate (float)
-# Blacklisted FPU registers: f2, f4, f6, f8
+# Blacklisted FPU registers: f2, f4, f6, f8, $f11, $f13, $f7, $f9
 .macro coordinate(%Xi, %Yi, %Vx, %Vy, %Xf, %Yf, %dt)
-    pushfloat($f2)
-    pushfloat($f4)
-    pushfloat($f6)
+    pushfloat($f2) # working variable
+    pushfloat($f4) # working variable
+    pushfloat($f6) # 
     pushfloat($f8)
+    pushfloat($f7) # accumulate vx
+    pushfloat($f9) # accumulate vy
+    pushfloat($f11)	# previous x displacement
+    pushfloat($f13) # previous y displacement
+    pushfloat($f15) # flt_threshold
     
     # Calculate velocity magnitude: sqrt(Vx^2 + Vy^2)
     mul.s $f2, %Vx, %Vx         # Vx^2
@@ -98,45 +104,61 @@ flt_threshold: .float 0.5
     # Normalize velocity components
     div.s $f6, %Vx, $f8         # Normalized Vx
     div.s $f8, %Vy, $f8         # Normalized Vy
+    
+    add.s $f7, $f7, $f6	  # Accumulate normalized velocities
+    add.s $f9, $f9, $f8
+    
+    sub.s $f7, $f7, px		  # subtract previous displacement
+    sub.s $f9, $f9, py
 
     # Threshold for significant movement
-    l.s $f2, flt_threshold      # Threshold for movement decision (e.g., 0.5)
+    l.s $f15, flt_threshold      # Threshold for movement decision (e.g., 0.5)
+    l.s $f21, flt_zero
 
     # Initialize Xf and Yf to current position
     move %Xf, %Xi               # Default Xf = Xi
     move %Yf, %Yi               # Default Yf = Yi
 
     # Determine X movement
-    abs.s $f4, $f6              # |Normalized Vx|
-    c.le.s $f2, $f4             # Check if |Vx| >= threshold
+    abs.s $f4, $f7              # |Normalized Vx|
+    c.le.s $f15, $f4             # Check if |Vx| >= threshold
     bc1f skip_x_movement        # Skip X movement if below threshold
-    c.lt.s %Vx, $f2             # Check if Vx < 0
+    c.lt.s $f7, $f21             # Check if Vx < 0
     bc1t move_left              # Move left if true
     addi %Xf, %Xi, 1            # Move right
+    add.s px, px, $f2
     j done_x_movement
 
 move_left:
     subi %Xf, %Xi, 1            # Move left
+    sub.s px, px, $f2
 
 done_x_movement:
 skip_x_movement:
 
     # Determine Y movement
-    abs.s $f4, $f8              # |Normalized Vy|
-    c.le.s $f2, $f4             # Check if |Vy| >= threshold
+    abs.s $f4, $f9              # |Normalized Vy|
+    c.le.s $f15, $f4             # Check if |Vy| >= threshold
     bc1f skip_y_movement        # Skip Y movement if below threshold
-    c.lt.s %Vy, $f2             # Check if Vy < 0
+    c.lt.s $f9, $f21             # Check if Vy < 0
     bc1t move_down              # Move down if true
     addi %Yf, %Yi, 1            # Move up
+    add.s py, py, $f2
     j done_y_movement
 
 move_down:
     subi %Yf, %Yi, 1            # Move down
+    sub.s py, py, $f2
 
 done_y_movement:
 skip_y_movement:
 
     coordinate_done:
+        popfloat($f15)
+        popfloat($f13) # previous y displacement
+        popfloat($f11)	# previous x displacement
+        popfloat($f9)
+        popfloat($f7)
         popfloat($f8)
         popfloat($f6)
         popfloat($f4)
@@ -159,18 +181,19 @@ rocketMath:
     # $f16 = time to next pixel
 
     # Calculate thrust components in x and y direction
-    thrust_components($f8, $f10, $t1, $f0)
+    thrust_components(Tx, Ty, T, angle)
 
     # Calculate Acceleration in x and y direction
-    Ax($f1, $f8, $t2)
-    Ay($f3, $f10, $t2)
+    Ax(ax, Tx, M)
+    Ay(ay, Ty, M)
     
     # Update velocities
-    vel_component($f1, $f12, $f12) # Ax + Vix = Vfx 
-    vel_component($f3, $f14, $f14) # Ay + Viy = Vfy
+    #	       (%a,  %Vi,  %Vf )
+    vel_component(ax, Vx, Vx) # Ax + Vix = Vfx 
+    vel_component(ay, Vy, Vy) # Ay + Viy = Vfy
 
     # Determine next pixel
     #         (%Xi, %Yi, %Vx,  %Vy,  %Xf, %Yf, %dt )
-    coordinate($t4, $t5, $f12, $f14, $t6, $t7, $f16)
+    coordinate(xi, yi, Vx, Vy, xf, yf, dt)
 
     jr $ra

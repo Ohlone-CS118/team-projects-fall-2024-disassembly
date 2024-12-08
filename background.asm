@@ -14,7 +14,7 @@ background:
 	push($ra)
 
 	li $a0, SHADEDBLUE		# this will be a sky blue background
-	#jal background_color
+	jal background_color
 	
 #------------------------------GRASS------------------------------------------#
 	
@@ -22,11 +22,11 @@ background:
 	li $a1, 58         # y-coordinate 
 	li $a3, 128        # length of the grass line (entire width)
 	li $a2, GREEN      # grass color
-	#jal draw_horizontal_line
+	jal draw_horizontal_line
 	li $a1, 59         # y-coordinate 
-	#jal draw_horizontal_line
+	jal draw_horizontal_line
 	li $a1, 60         # y-coordinate 
-	#jal draw_horizontal_line
+	jal draw_horizontal_line
 	
 #-----------------------------BUILDINGS----------------------------#
 
@@ -36,13 +36,13 @@ background:
 	li $a3, 30         # height of building
 	li $a1, 30         # y-coordinate
 	li $a0, 250        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 248        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 246        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 244        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	
 	li $a2, YELLOW	# color
 	li $a0, 59	# x-coordinate 
@@ -71,15 +71,15 @@ background:
 	li $a2, BLACK	# building color
 	li $a1, 20	# y-coordinate
 	li $a0, 230	# x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 228	# x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 226	# x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 224	# x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 222	# x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	
 	li $a2, YELLOW      # color
 	li $a0, 49	# x-coordinate 
@@ -114,15 +114,15 @@ background:
 	li $a2, BLACK      # building color
 	li $a0, 214        # x-coordinate
 	li $a1, 24         # y-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 212        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 210        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 208        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 206        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	
 	li $a2, YELLOW      # color
 	li $a0, 40	# x-coordinate 
@@ -166,15 +166,15 @@ background:
 	li $a2, BLACK      # building color
 	li $a1, 14         # y-coordinate
 	li $a0, 196        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 194        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 192        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 190        # x-coordinate
-	#jal draw_vertical_line	
+	jal draw_vertical_line	
 	li $a0, 188        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	
 	li $a2, YELLOW      	# color
 	li $a0, 31		# x-coordinate 
@@ -227,15 +227,15 @@ background:
 	li $a1, 34         # y-coordinate
 	li $a3, 40         # height of building
 	li $a2, BLACK      # building color
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 176        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 174        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 172        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	li $a0, 170        # x-coordinate
-	#jal draw_vertical_line
+	jal draw_vertical_line
 	
 	li $a2, YELLOW      	# color
 	li $a0, 22		# x-coordinate 

@@ -5,7 +5,7 @@ define:
 	.eqv PIXEL_SIZE 4
 	.eqv WIDTH 64
 	.eqv HEIGHT 32
-	.eqv DISPLAY 0x10010000
+	.eqv DISPLAY 0x10040000
 
 # the colors used in my artwork
 	.eqv BLACK	0x00000000
@@ -19,6 +19,24 @@ define:
 	#.eqv RED		0x00FF0000
 	.eqv SHADEDBLUE	0x00CCCCFF	
 	.eqv DARK_GREEN 0x00003300
+	
+	.eqv angle $f0
+	.eqv ax $f1 
+	.eqv ay $f3 
+	.eqv Tx $f5 
+	.eqv Ty $f10 
+	.eqv Vx $f12 
+	.eqv Vy $f14 
+	.eqv dt $f16 
+	.eqv T $t1
+	.eqv M $t2 
+	.eqv xi $t4 
+	.eqv yi $t5 
+	.eqv xf $t6 
+	.eqv yf $t7
+	.eqv px $f11
+	.eqv py $f13
+	# Blacklisted FPU registers: f2, f4, f6, f7, f8, f9, $f11, $f13
 
 .macro draw_pixel(%x, %y, %color)
 	mul $s1, %y, WIDTH	# the product from (y * WIDTH)

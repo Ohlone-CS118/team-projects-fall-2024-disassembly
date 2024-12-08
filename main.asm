@@ -3,18 +3,26 @@
 .include "utilities.asm"
 
 .data
-keyboard_input: .word 0    # Address for keyboard input (MMIO location)
-radianoffset: .float 0.392699 #22.5 degrees
-angle: .float 1.5708    # 90 degrees in radians
+start_angle: .float 0.78539    # 90 degrees in radians
 millisecond: .float 1000
+radianoffset: .float 1.00
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
 welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
-retry_prompt: .asciiz "\n\nWould you like to retry? Press 1 to retry, 0 to exit: "
-#exit_message: .asciiz "\n\nExiting program..."
+retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
+exit_message: .asciiz "\n\nExiting program..."
 level_one_message: .asciiz "\nLevel 1: \n\n"
 fail_message: .asciiz "\nLevel Failed\n"
-#success_message: .asciiz "\nLevel Complete\n"
+success_message: .asciiz "\nLevel Complete\n"
+
+# Output placeholders
+output_Xf: .word 0           # Final X coordinate
+output_Yf: .word 0           # Final Y coordinate
+output_t: .float 0.0         # Time to next pixel
+
+msg_Xf: .asciiz "\nFinal X: "
+msg_Yf: .asciiz "  Final Y: "
+msg_t:  .asciiz "  Time to next pixel: "
 
 .text
 
@@ -24,10 +32,6 @@ main:
 
 .globl level_one
 .globl exit
-.globl wInput
-.globl aInput
-.globl sInput
-.globl dInput
 
 	move $s2, $zero # set hold counter to 0
 	li $s3, 4	# predefined length to be counted as holding
@@ -44,14 +48,122 @@ main:
 	
 	sw $s1, 0xffff0000	# Update the memory mapped receiver control register.
 
-		li $v0, 4
+
+	li $v0, 4
 	la $a0, welcome_message
 	syscall
 
 	la $a0, welcome_prompt
 	syscall
 
-	###############################################################################
+# loop to check if user entered Y, N, enter
+level_one_prompt_loop:
+# waiting for input
+	j level_one_prompt_loop
+
+
+# LEVEL 1
+level_one:
+	#j __resume
+	li $v0, 4
+	la $a0, level_one_message
+	syscall
+
+	jal background
+
+	l.s $f0, start_angle # Load angle into $f0
+	li $t1, 1000       # Load starting thrust into $t1
+	li $t2, 50         # Load mass into $t2
+
+	li $t4, 10	# starting coords
+	li $t5, 5
+	
+	# draw rocket
+	li $a2, DARK_GREEN
+	jal redraw_rocket
+
+level_one_loop:
+	# calculate
+	jal rocketMath
+	
+	sw $t6, output_Xf         # Store final X coordinate
+	sw $t7, output_Yf         # Store final Y coordinate
+	s.s $f16, output_t        # Store time to next pixel as float
+	# Print results
+	li $v0, 4                 # Print string syscall
+	la $a0, msg_Xf            # Message: "Final X: "
+	syscall
+	li $v0, 1                 # Print integer syscall
+	lw $a0, output_Xf         # Load final X
+	syscall
+	li $v0, 4                 # Print string syscall
+	la $a0, msg_Yf            # Message: "Final Y: "
+	syscall
+	li $v0, 1                 # Print integer syscall
+	lw $a0, output_Yf         # Load final Y
+	syscall
+	li $v0, 4                 # Print string syscall
+	la $a0, msg_t             # Message: "Time to next pixel: "
+	syscall
+	li $v0, 2                 # Print float syscall
+	l.s $f12, output_t        # Load time to next pixel
+	syscall
+	
+	# wait
+	l.s $f17, millisecond  # load 1000 as multiplier into $f17
+	mul.s $f16, $f16, $f17 # multiply time by 1000 (to count milliseconds)
+	cvt.w.s $f16, $f16	   # convert to word
+	push($a0)		   # store $a0 temporarily
+	mfc1 $a0, $f16	   # move converted time to $a0
+	li $v0, 32	   # set syscall to sleep based on time in milliseconds in $a0
+	syscall
+	pop($a0)		   # restore $a0
+
+	# erase rocket at old position
+	li $a2, SHADEDBLUE
+	jal redraw_rocket
+
+	move $t4, $t6 # set $t4 to $t6 (set x coord to new x)
+	move $t5, $t7 # set $t5 to $t7 (set y coord to new y)
+	
+	# error collision
+	#if out of bounds collision, end loop, level failed
+	blt $t5, 1, out_of_bounds
+	bgt $t5, 32, out_of_bounds
+	blt $t4, 0, out_of_bounds
+	bgt $t4, 63, out_of_bounds
+	
+	#if incorrect building collision, end loop, level failed
+    	#if correct building collision, end loop, level succeeded
+	
+	# draw rocket at new coodinates
+	li $a2, DARK_GREEN
+	jal redraw_rocket  
+
+	j level_one_loop
+
+out_of_bounds:
+	li $v0, 4
+	la $a0, fail_message
+	syscall
+	la $a0, retry_prompt
+	syscall
+	
+	# loop to check if user entered Y, N, enter
+retry_prompt_loop:
+	# waiting for input
+	j retry_prompt_loop
+
+exit:
+	# print exit message, exit safely
+	li $v0, 4
+	la $a0, exit_message
+	syscall
+	li $v0, 10
+	syscall
+	
+
+###############################################################################
 # KERNEL DATA SEGMENT
 ###############################################################################
 
@@ -180,17 +292,17 @@ __keyboard_interrupt:
 	# Use the MARS built-in system call 11 (print char) to print the character
 	# from receiver data.
 
-	# beq $t0, $k1, holdCounter	# if key pressed is the same as previous key pressed
+	beq $t0, $k1, holdCounter	# if key pressed is the same as previous key pressed
 
-	# li $s2, 1 # reset hold counter to 1
+	li $s2, 1 # reset hold counter to 1
 
-	# j notHolding	
+	j notHolding	
 
-	# holdCounter:
-	# addi $s2, $s2, 1		# hold counter++
+	holdCounter:
+	addi $s2, $s2, 1		# hold counter++
 
-	# notHolding:
-	# move $t0, $k1	# save current character to next comparison
+	notHolding:
+	move $t0, $k1	# save current character to next comparison
 	
 	li $v0, 11 		# print the character entered 
 	move $a0, $k1 
@@ -199,88 +311,32 @@ __keyboard_interrupt:
 
 beq $k1, '1', level_one
 beq $k1, '0', exit
+
 beq $k1, 'w', wInput
 beq $k1, 'a', aInput
 beq $k1, 's', sInput
 beq $k1, 'd', dInput
+    
+# example for holding detection
+beq $k1, '2', pressed2 # if key 2 is being pressed
 
-j __resume
+pressed2:
+bge $s2, $s3, held2 # if key 2 is being held
+#pressed2 content
 
-# LEVEL 1
-level_one:
 
-	li $v0, 4
-	la $a0, level_one_message
-	syscall
+held2:
+#held2 content
 
-	jal background
-
-	l.s $f0, angle # Load angle into $f0
-	li $t1, 400       # Load starting thrust into $t1
-	li $t2, 50         # Load mass into $t2
-
-	li $t4, 10	# starting coords
-	li $t5, 5
-	
-	# draw rocket
-	li $a2, DARK_GREEN
-	jal redraw_rocket
-
-level_one_loop:
-	# calculate
-	jal rocketMath
-	
-	# wait
-	l.s $f17, millisecond	# load 1000 as multiplier into $f17
-	mul.s $f16, $f16, $f17 # multiply time by 1000 (to count milliseconds)
-	cvt.w.s $f16, $f16	# convert to word
-	push($a0) # store $a0 temporarily
-	mfc1 $a0, $f16 # move converted time to $a0
-	li $v0, 32 # set syscall to sleep based on time in milliseconds in $a0
-	syscall
-	pop($a0) # restore $a0
-
-	li $a2, SHADEDBLUE	# erase rocket at old position
-	jal redraw_rocket
-
-	move $t4, $t6 # set $t4 to $t6 (set x coord to new x)
-	move $t5, $t7 # set $t5 to $t7 (set y coord to new y)
-	
-	# error collision
-	#if out of bounds collision, end loop, level failed
-	blt $t5, 1, out_of_bounds
-	bgt $t5, 32, out_of_bounds
-	blt $t4, 0, out_of_bounds
-	bgt $t4, 63, out_of_bounds
-	
-	#if incorrect building collision, end loop, level failed
-    	#if correct building collision, end loop, level succeeded
-	
-	
-	li $a2, DARK_GREEN
-	jal redraw_rocket # draw rocket at new coodinates  
-
-	j level_one_loop
-
-out_of_bounds:
-	li $v0, 4
-	la $a0, fail_message
-	syscall
-	la $a0, retry_prompt
-	syscall
+###
 
 wInput:
-li $t1, 200
-
 addi $t1, $t1, 10
 j __resume
 
 aInput:
-li $v0, 11
-la $a0, ']'
-syscall
 l.s $f30, radianoffset
-add.s $f16, $f16, $f30
+add.s $f0, $f0, $f30
 j __resume
 
 sInput:
@@ -289,10 +345,11 @@ subi $t1, $t1, 10
 sInputSkip:
 j __resume
 
-
 dInput:
 l.s $f30, radianoffset
-sub.s $f16, $f16, $f30
+sub.s $f0, $f0, $f30
+j __resume
+
 j __resume
 	
 
@@ -315,11 +372,8 @@ __resume_from_exception:
         mtc0 $k0, $14		# Update EPC in coprocessor 0.
         
 __resume:
-            
 	# Use the eret (Exception RETurn) instruction to set the program counter
 	# (PC) to the value saved in the ECP register (register 14 in coporcessor 0).
 	
 	eret # Look at the value of $14 in Coprocessor 0 before single stepping.
-exit:
-	li $v0, 10      #exit safely
-	syscall
+
