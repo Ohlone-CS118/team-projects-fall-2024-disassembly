@@ -59,8 +59,8 @@ main:
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
 	# waiting for input
-	beq $a0, '1', level_one
-	beq $a0, '0', exit
+	beq $a0, 1, level_one
+	beq $a0, 2, exit
 	j level_one_prompt_loop
 
 # LEVEL 1
@@ -155,8 +155,8 @@ out_of_bounds:
 	
 	# loop to check if user entered Y, N, enter
 retry_prompt_loop:
-	beq $a0, '1', level_one
-	beq $a0, '0', exit
+	beq $a0, 1, level_one
+	beq $a0, 2, exit
 	# waiting for input
 	j retry_prompt_loop
 
@@ -317,8 +317,8 @@ __keyboard_interrupt:
 	#move $a0, $k1 
 	#syscall       
 
-	beq $k1, '1', yes_no
-	beq $k1, '0', yes_no
+	beq $k1, '1', yes
+	beq $k1, '0', no
 	beq $k1, 'w', wInput
 	beq $k1, 'a', aInput
 	beq $k1, 's', sInput
@@ -334,8 +334,11 @@ __keyboard_interrupt:
 #held2:
 	#held2 content
 
-yes_no:
-	move $a0, $k1
+yes:
+	li $a0, 1
+	j __resume
+no:
+	li $a0, 2
 	j __resume
 
 wInput:
