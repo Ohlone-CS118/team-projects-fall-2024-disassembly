@@ -5,6 +5,11 @@
 	flt_half: .float 0.5
 	flt_zero: .float 0.0
 	
+	flt_three: .float 3.0
+	flt_five: .float 5.0
+	flt_seven: .float 7.0
+	flt_nine: .float 9.0
+	
 	pi: .float 3.14159265
 	
 	grav_const: .float 9.80
@@ -32,7 +37,9 @@ define:
 	.eqv SHADEDBLUE	0x00CCCCFF	
 	.eqv DARK_GREEN 0x00003300
 	
+	.eqv newangle $f27
 	.eqv angle $f0
+	.eqv drawangle $f23
 	.eqv ax $f1 
 	.eqv ay $f3 
 	.eqv Tx $f5 

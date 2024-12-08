@@ -7,26 +7,26 @@
 # Display Height in Pixels: 256
 # Base address for display: 0x10040000 (heap)
 
-
 .include "utilities.asm"
 
 .data
+
 start_angle: .float 1.570796    # 90 degrees in radians
 radianoffset: .float 0.26179
-
-welcome_message: .asciiz "Welcome to our program! Insert information here. "
-welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
-retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
-exit_message: .asciiz "\n\nExiting program..."
-level_one_message: .asciiz "\nLevel 1: \n\n"
-fail_message: .asciiz "\nLevel Failed\n"
-success_message: .asciiz "\nLevel Complete\n"
 
 # Output placeholders
 output_Xf: .word 0           # Final X coordinate
 output_Yf: .word 0           # Final Y coordinate
 output_t: .float 0.0         # Time to next pixel
 
+welcome_message: .asciiz "Welcome to our program! Insert information here. "
+welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
+retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
+exit_message: .asciiz "\n\nExiting program..."
+error_message: .asciiz "\n\nExiting due to errors..."
+level_one_message: .asciiz "\nLevel 1: \n\n"
+fail_message: .asciiz "\nLevel Failed\n"
+success_message: .asciiz "\nLevel Complete\n"
 msg_Xf: .asciiz "\nFinal X: "
 msg_Yf: .asciiz "  Final Y: "
 msg_t:  .asciiz "  Time to next pixel: "
@@ -34,28 +34,24 @@ msg_t:  .asciiz "  Time to next pixel: "
 .text
 
 .globl main
-
-main:
-
 .globl level_one
 .globl exit
 
+main:
 	# set up keyboard input detection through interrupts
-	move $s2, $zero # set hold counter to 0
-	li $s3, 4	# predefined length to be counted as holding
-
-  	lw $s0, 0xffff0000 # Get value of the memory mapped receiver control register.		
-
+	# set hold counter to 0
+	move $s2, $zero
+	# predefined length to be counted as holding
+	li $s3, 4
+	# Get value of the memory mapped receiver control register
+  	lw $s0, 0xffff0000		
 	# Set bit 1 (interrupt enable) in receiver control to 1.
-	
 	# Bits are numbered from 0 to 31 with 0 beeing the least significant bit.
 	# Use the bitmask 0x2 = [bin] = 0000 ..... 0010
 	# Use the ori (bitwise or immediate) instruction and store result in $s1.
-	
-	ori $s1, $s1, 0x2 
-	
-	sw $s1, 0xffff0000	# Update the memory mapped receiver control register.
-
+	ori $s1, $s1, 0x2
+	# Update the memory mapped receiver control register
+	sw $s1, 0xffff0000
 
 	li $v0, 4
 	la $a0, welcome_message
@@ -66,11 +62,10 @@ main:
 
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
-# waiting for input
+	# waiting for input
 	beq $a0, '1', level_one
 	beq $a0, '0', exit
 	j level_one_prompt_loop
-
 
 # LEVEL 1
 level_one:
@@ -83,7 +78,8 @@ level_one:
 	jal background
 	
 	# load starting rocket conditions
-	l.s angle, start_angle
+	l.s newangle, start_angle
+	l.s drawangle, start_angle
 	li newT, 520
 	li M, 50
 	
@@ -104,45 +100,28 @@ level_one:
 	jal redraw_rocket
 
 level_one_loop:
-	# calculate
+	# update input
+	mov.s angle, newangle
 	move T, newT
+	
+	# calculate
 	jal rocketMath
 	
-	sw xf, output_Xf         # Store final X coordinate
-	sw yf, output_Yf         # Store final Y coordinate
-	s.s dt, output_t        # Store time to next pixel as float
-	# Print results
-	li $v0, 4                 # Print string syscall
-	la $a0, msg_Xf            # Message: "Final X: "
-	syscall
-	li $v0, 1                 # Print integer syscall
-	lw $a0, output_Xf         # Load final X
-	syscall
-	li $v0, 4                 # Print string syscall
-	la $a0, msg_Yf            # Message: "Final Y: "
-	syscall
-	li $v0, 1                 # Print integer syscall
-	lw $a0, output_Yf         # Load final Y
-	syscall
-	li $v0, 4                 # Print string syscall
-	la $a0, msg_t             # Message: "Time to next pixel: "
-	syscall
-	li $v0, 2                 # Print float syscall
-	l.s $f12, output_t        # Load time to next pixel
-	syscall
+	# print new data
+	jal print_status
 	
 	# wait
-	l.s $f17, millisecond  # load 1000 as multiplier into $f17
-	mul.s dt, dt, $f17 # multiply time by 1000 (to count milliseconds)
-	cvt.w.s dt, dt	   # convert to word
-	push($a0)		   # store $a0 temporarily
-	mfc1 $a0, dt	   # move converted time to $a0
+	l.s $f17, millisecond	# load 1000 as multiplier into $f17
+	mul.s dt, dt, $f17		# multiply time by 1000 (to count milliseconds)
+	cvt.w.s dt, dt		# convert to word
+	push($a0)			# store $a0 temporarily
+	mfc1 $a0, dt		# move converted time to $a0
 	blt $a0, 1000, dont_limit_time
 	li $a0, 1000
 	dont_limit_time:
-	li $v0, 32	   # set syscall to sleep based on time in milliseconds in $a0
+	li $v0, 32		# set syscall to sleep based on time in milliseconds in $a0
 	syscall
-	pop($a0)		   # restore $a0
+	pop($a0)			# restore $a0
 
 	# erase rocket at old position
 	li $a2, SHADEDBLUE
@@ -160,6 +139,9 @@ level_one_loop:
 	
 	#if incorrect building collision, end loop, level failed
     	#if correct building collision, end loop, level succeeded
+	
+	# estimate rocket angle
+	jal angle_aprox
 	
 	# draw rocket at new coodinates
 	li $a2, DARK_GREEN
@@ -189,6 +171,33 @@ exit:
 	li $v0, 10
 	syscall
 	
+print_status:
+	pushfloat($f12)
+	sw xf, output_Xf	# Store final X coordinate
+	sw yf, output_Yf	# Store final Y coordinate
+	s.s dt, output_t	# Store time to next pixel as float
+	# Print results
+	li $v0, 4		# Print string syscall
+	la $a0, msg_Xf	# Message: "Final X: "
+	syscall
+	li $v0, 1		# Print integer syscall
+	lw $a0, output_Xf	# Load final X
+	syscall
+	li $v0, 4		# Print string syscall
+	la $a0, msg_Yf	# Message: "Final Y: "
+	syscall
+	li $v0, 1		# Print integer syscall
+	lw $a0, output_Yf	# Load final Y
+	syscall
+	li $v0, 4		# Print string syscall
+	la $a0, msg_t	# Message: "Time to next pixel: "
+	syscall
+	li $v0, 2		# Print float syscall
+	l.s $f12, output_t	# Load time to next pixel
+	syscall
+	popfloat($f12)
+	jr $ra
+	
 
 ###############################################################################
 # KERNEL DATA SEGMENT
@@ -196,11 +205,11 @@ exit:
 
 .kdata
 		
-	UNHANDLED_EXCEPTION:	.asciiz "===>      Unhandled exception       <===\n\n"
-	UNHANDLED_INTERRUPT: 	.asciiz "===>      Unhandled interrupt       <===\n\n"
-	OVERFLOW_EXCEPTION: 	.asciiz "===>      Arithmetic overflow       <===\n\n" 
-	TRAP_EXCEPTION: 	.asciiz "===>         Trap exception         <===\n\n"
-	BAD_ADDRESS_EXCEPTION: 	.asciiz "===>   Bad data address exception   <===\n\n"
+	UNHANDLED_EXCEPTION:	.asciiz "\n===>      Unhandled exception       <===\n"
+	UNHANDLED_INTERRUPT:	.asciiz "\n===>      Unhandled interrupt       <===\n"
+	OVERFLOW_EXCEPTION:		.asciiz "\n===>      Arithmetic overflow       <===\n" 
+	TRAP_EXCEPTION:		.asciiz "\n===>         Trap exception         <===\n"
+	BAD_ADDRESS_EXCEPTION:	.asciiz "\n===>   Bad data address exception   <===\n"
 		
 ###############################################################################
 # KERNEL TEXT SEGMENT 
@@ -290,78 +299,81 @@ __keyboard_interrupt:
 	beq $t0, $k1, holdCounter	# if key pressed is the same as previous key pressed
 	li $s2, 1 # reset hold counter to 1
 	j notHolding	
-	holdCounter:
+holdCounter:
 	addi $s2, $s2, 1		# hold counter++
 
-	notHolding:
+notHolding:
 	move $t0, $k1	# save current character to next comparison
 	
 	li $v0, 11 		# print the character entered 
 	move $a0, $k1 
 	syscall       
 
-
-beq $k1, '1', yes_no
-beq $k1, '0', yes_no
-beq $k1, 'w', wInput
-beq $k1, 'a', aInput
-beq $k1, 's', sInput
-beq $k1, 'd', dInput
-    
-# example for holding detection
-beq $k1, '2', pressed2 # if key 2 is being pressed
+	beq $k1, '1', yes_no
+	beq $k1, '0', yes_no
+	beq $k1, 'w', wInput
+	beq $k1, 'a', aInput
+	beq $k1, 's', sInput
+	beq $k1, 'd', dInput
+	
+	# example for holding detection
+	beq $k1, '2', pressed2 # if key 2 is being pressed
 
 pressed2:
-bge $s2, $s3, held2 # if key 2 is being held
-#pressed2 content
+	bge $s2, $s3, held2 # if key 2 is being held
+	#pressed2 content
 
 held2:
-#held2 content
+	#held2 content
 
 yes_no:
-move $a0, $k1
-j __resume
+	move $a0, $k1
+	j __resume
 
 wInput:
-addi newT, newT, 50
-j __resume
+	addi newT, newT, 50
+	j __resume
 
 aInput:
-l.s $f30, radianoffset
-add.s angle, angle, $f30
-j __resume
+	l.s $f30, radianoffset
+	add.s newangle, newangle, $f30
+	j __resume
 
 sInput:
-ble $t1, $zero, sInputSkip
-subi newT, newT, 50
+	ble $t1, $zero, sInputSkip
+	subi newT, newT, 50
 sInputSkip:
-j __resume
+	j __resume
 
 dInput:
-l.s $f30, radianoffset
-sub.s angle, angle, $f30
-j __resume
+	l.s $f30, radianoffset
+	sub.s newangle, newangle, $f30
+	j __resume
 
 __resume_from_exception: 
-	
 	# When an exception or interrupt occurs, the value of the program counter 
 	# ($pc) of the user level program is automatically stored in the exception 
-	# program counter (ECP), the $14 in Coprocessor 0. 
+	# program counter (ECP), the $14 in Coprocessor 0.
+	
+	# Get value of EPC (Address of instruction causing the exception).
+	mfc0 $k0, $14
+	
+	# Skip offending instruction by adding 4 to the value stored in EPC.
+	# Otherwise the same instruction would be executed again causing the same
+	# exception again.
+	
+	addi $k0, $k0, 4 	# Skip offending instruction by adding 4 to the value stored in EPC.     
+	
+	# Update EPC in coprocessor 0.
+	mtc0 $k0, $14
+	
+	li $v0, 4
+	la $a0, error_message
+	syscall
+	li $v0, 10
+	syscall
 
-        # Get value of EPC (Address of instruction causing the exception).
-       
-        mfc0 $k0, $14
-        
-        # Skip offending instruction by adding 4 to the value stored in EPC. 
-        # Otherwise the same instruction would be executed again causing the same 
-        # exception again.
-        
-        addi $k0, $k0, 4 	# Skip offending instruction by adding 4 to the value stored in EPC.     
-        
-        mtc0 $k0, $14		# Update EPC in coprocessor 0.
-        
 __resume:
 	# Use the eret (Exception RETurn) instruction to set the program counter
 	# (PC) to the value saved in the ECP register (register 14 in coporcessor 0).
-	
 	eret # Look at the value of $14 in Coprocessor 0 before single stepping.
