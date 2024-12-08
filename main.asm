@@ -11,8 +11,8 @@
 .include "utilities.asm"
 
 .data
-start_angle: .float 0.539    # 90 degrees in radians
-radianoffset: .float 1.00
+start_angle: .float 1.570796    # 90 degrees in radians
+radianoffset: .float 0.26179
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
 welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
@@ -81,10 +81,19 @@ level_one:
 
 	# draw background
 	jal background
-
-	l.s angle, start_angle # Load angle into $f0
-	li T, 1000       # Load starting thrust into $t1
-	li M, 50         # Load mass into $t2
+	
+	# load starting rocket conditions
+	l.s angle, start_angle
+	li newT, 520
+	li M, 50
+	
+	# reset accumulating registers
+	l.s eVx, flt_zero
+	l.s eVy, flt_zero
+	l.s px, flt_zero
+	l.s py, flt_zero
+	l.s Vx, flt_zero
+	l.s Vy, flt_zero
 	
 	# set starting coords
 	li xi, 10	
@@ -96,6 +105,7 @@ level_one:
 
 level_one_loop:
 	# calculate
+	move T, newT
 	jal rocketMath
 	
 	sw xf, output_Xf         # Store final X coordinate
@@ -127,6 +137,9 @@ level_one_loop:
 	cvt.w.s dt, dt	   # convert to word
 	push($a0)		   # store $a0 temporarily
 	mfc1 $a0, dt	   # move converted time to $a0
+	blt $a0, 1000, dont_limit_time
+	li $a0, 1000
+	dont_limit_time:
 	li $v0, 32	   # set syscall to sleep based on time in milliseconds in $a0
 	syscall
 	pop($a0)		   # restore $a0
@@ -310,7 +323,7 @@ move $a0, $k1
 j __resume
 
 wInput:
-addi T, T, 10
+addi newT, newT, 50
 j __resume
 
 aInput:
@@ -320,7 +333,7 @@ j __resume
 
 sInput:
 ble $t1, $zero, sInputSkip
-subi T, T, 10
+subi newT, newT, 50
 sInputSkip:
 j __resume
 

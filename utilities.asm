@@ -41,6 +41,7 @@ define:
 	.eqv Vy $f14 
 	.eqv dt $f16 
 	.eqv T $t1
+	.eqv newT $t3
 	.eqv M $t2 
 	.eqv xi $t4 
 	.eqv yi $t5 
