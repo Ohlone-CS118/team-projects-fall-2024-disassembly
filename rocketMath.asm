@@ -85,10 +85,6 @@ flt_threshold: .float 0.5
     pushfloat($f4) # working variable
     pushfloat($f6) # 
     pushfloat($f8)
-    pushfloat($f7) # accumulate vx
-    pushfloat($f9) # accumulate vy
-    pushfloat($f11)	# previous x displacement
-    pushfloat($f13) # previous y displacement
     pushfloat($f15) # flt_threshold
     
     # Calculate velocity magnitude: sqrt(Vx^2 + Vy^2)
@@ -105,11 +101,11 @@ flt_threshold: .float 0.5
     div.s $f6, %Vx, $f8         # Normalized Vx
     div.s $f8, %Vy, $f8         # Normalized Vy
     
-    add.s $f7, $f7, $f6	  # Accumulate normalized velocities
-    add.s $f9, $f9, $f8
+    add.s eVx, eVx, $f6	  # Accumulate normalized velocities
+    add.s eVy, eVy, $f8
     
-    sub.s $f7, $f7, px		  # subtract previous displacement
-    sub.s $f9, $f9, py
+    sub.s eVx, eVx, px		  # subtract previous displacement
+    sub.s eVy, eVy, py
 
     # Threshold for significant movement
     l.s $f15, flt_threshold      # Threshold for movement decision (e.g., 0.5)
@@ -120,45 +116,49 @@ flt_threshold: .float 0.5
     move %Yf, %Yi               # Default Yf = Yi
 
     # Determine X movement
-    abs.s $f4, $f7              # |Normalized Vx|
+    abs.s $f4, eVx              # |Normalized Vx|
     c.le.s $f15, $f4             # Check if |Vx| >= threshold
     bc1f skip_x_movement        # Skip X movement if below threshold
-    c.lt.s $f7, $f21             # Check if Vx < 0
+    c.lt.s eVx, $f21             # Check if Vx < 0
     bc1t move_left              # Move left if true
     addi %Xf, %Xi, 1            # Move right
-    add.s px, px, $f2
+    mov.s px, $f2
     j done_x_movement
 
 move_left:
     subi %Xf, %Xi, 1            # Move left
+    mov.s px, $f2
     sub.s px, px, $f2
+    sub.s px, px, $f2
+    j done_x_movement
 
-done_x_movement:
 skip_x_movement:
+	l.s px, flt_zero
+done_x_movement:
 
     # Determine Y movement
-    abs.s $f4, $f9              # |Normalized Vy|
+    abs.s $f4, eVy              # |Normalized Vy|
     c.le.s $f15, $f4             # Check if |Vy| >= threshold
     bc1f skip_y_movement        # Skip Y movement if below threshold
-    c.lt.s $f9, $f21             # Check if Vy < 0
+    c.lt.s eVy, $f21             # Check if Vy < 0
     bc1t move_down              # Move down if true
     addi %Yf, %Yi, 1            # Move up
-    add.s py, py, $f2
+    mov.s py, $f2
     j done_y_movement
 
 move_down:
     subi %Yf, %Yi, 1            # Move down
+    mov.s py, $f2
     sub.s py, py, $f2
+    sub.s py, py, $f2
+    j done_y_movement
 
-done_y_movement:
 skip_y_movement:
+	l.s py, flt_zero
+done_y_movement:
 
     coordinate_done:
         popfloat($f15)
-        popfloat($f13) # previous y displacement
-        popfloat($f11)	# previous x displacement
-        popfloat($f9)
-        popfloat($f7)
         popfloat($f8)
         popfloat($f6)
         popfloat($f4)
@@ -171,15 +171,6 @@ skip_y_movement:
 .globl rocketMath
 
 rocketMath:
-    # $f0 = angle
-    # $t1 = thrust
-    # $t2 = mass
-    # $t4 = initial x coordinate
-    # $t5 = initial y coordinate
-    # $t6 = final x coordinate
-    # $t7 = final y coordinate
-    # $f16 = time to next pixel
-
     # Calculate thrust components in x and y direction
     thrust_components(Tx, Ty, T, angle)
 
@@ -188,12 +179,12 @@ rocketMath:
     Ay(ay, Ty, M)
     
     # Update velocities
-    #	       (%a,  %Vi,  %Vf )
+    #	       (a,  Vi, Vf)
     vel_component(ax, Vx, Vx) # Ax + Vix = Vfx 
     vel_component(ay, Vy, Vy) # Ay + Viy = Vfy
 
     # Determine next pixel
-    #         (%Xi, %Yi, %Vx,  %Vy,  %Xf, %Yf, %dt )
+    #         (Xi, Yi, Vx, Vy, Xf, Yf, dt)
     coordinate(xi, yi, Vx, Vy, xf, yf, dt)
 
     jr $ra

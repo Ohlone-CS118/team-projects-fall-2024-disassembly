@@ -36,6 +36,8 @@ define:
 	.eqv yf $t7
 	.eqv px $f11
 	.eqv py $f13
+	.eqv eVx $f7
+	.eqv eVy $f9
 	# Blacklisted FPU registers: f2, f4, f6, f7, f8, f9, $f11, $f13
 
 .macro draw_pixel(%x, %y, %color)

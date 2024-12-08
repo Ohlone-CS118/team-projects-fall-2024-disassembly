@@ -11,7 +11,7 @@
 .include "utilities.asm"
 
 .data
-start_angle: .float 0.78539    # 90 degrees in radians
+start_angle: .float 0.539    # 90 degrees in radians
 millisecond: .float 1000
 radianoffset: .float 1.00
 
@@ -99,9 +99,9 @@ level_one_loop:
 	# calculate
 	jal rocketMath
 	
-	sw $t6, output_Xf         # Store final X coordinate
-	sw $t7, output_Yf         # Store final Y coordinate
-	s.s $f16, output_t        # Store time to next pixel as float
+	sw xf, output_Xf         # Store final X coordinate
+	sw yf, output_Yf         # Store final Y coordinate
+	s.s dt, output_t        # Store time to next pixel as float
 	# Print results
 	li $v0, 4                 # Print string syscall
 	la $a0, msg_Xf            # Message: "Final X: "
@@ -124,10 +124,10 @@ level_one_loop:
 	
 	# wait
 	l.s $f17, millisecond  # load 1000 as multiplier into $f17
-	mul.s $f16, $f16, $f17 # multiply time by 1000 (to count milliseconds)
-	cvt.w.s $f16, $f16	   # convert to word
+	mul.s dt, dt, $f17 # multiply time by 1000 (to count milliseconds)
+	cvt.w.s dt, dt	   # convert to word
 	push($a0)		   # store $a0 temporarily
-	mfc1 $a0, $f16	   # move converted time to $a0
+	mfc1 $a0, dt	   # move converted time to $a0
 	li $v0, 32	   # set syscall to sleep based on time in milliseconds in $a0
 	syscall
 	pop($a0)		   # restore $a0
@@ -311,23 +311,23 @@ move $a0, $k1
 j __resume
 
 wInput:
-addi $t1, $t1, 10
+addi T, T, 10
 j __resume
 
 aInput:
 l.s $f30, radianoffset
-add.s $f0, $f0, $f30
+add.s angle, angle, $f30
 j __resume
 
 sInput:
 ble $t1, $zero, sInputSkip
-subi $t1, $t1, 10
+subi T, T, 10
 sInputSkip:
 j __resume
 
 dInput:
 l.s $f30, radianoffset
-sub.s $f0, $f0, $f30
+sub.s angle, angle, $f30
 j __resume
 
 __resume_from_exception: 
