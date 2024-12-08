@@ -12,7 +12,6 @@
 
 .data
 start_angle: .float 0.539    # 90 degrees in radians
-millisecond: .float 1000
 radianoffset: .float 1.00
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "

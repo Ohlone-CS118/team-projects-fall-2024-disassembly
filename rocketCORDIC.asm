@@ -12,14 +12,6 @@ arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.06241
 
 scaling_factor: .float 0.607252935 # Scaling factor K
 
-flt_neg_one: .float -1.0
-flt_one: .float 1.0
-flt_half: .float 0.5
-flt_zero: .float 0.0
-
-pi: .float 3.14159265
-
-#testconst: .float 0.0
 thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .text

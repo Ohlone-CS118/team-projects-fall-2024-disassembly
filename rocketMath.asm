@@ -2,10 +2,6 @@
 
 .data
 
-grav_const: .float 9.80
-flt_threshold: .float 0.5
-
-
 # Calculate components of thrust
 # Preconditions: Angle in radians, T as integer
 # Postconditions: Tx in FPU register
@@ -83,53 +79,51 @@ flt_threshold: .float 0.5
 .macro coordinate(%Xi, %Yi, %Vx, %Vy, %Xf, %Yf, %dt)
     pushfloat($f2) # working variable
     pushfloat($f4) # working variable
-    pushfloat($f6) # 
-    pushfloat($f8)
+    pushfloat($f6) # working variable
+    pushfloat($f8) # working variable
     pushfloat($f15) # flt_threshold
     
     # Calculate velocity magnitude: sqrt(Vx^2 + Vy^2)
-    mul.s $f2, %Vx, %Vx         # Vx^2
-    mul.s $f4, %Vy, %Vy         # Vy^2
-    add.s $f6, $f2, $f4         # Vx^2 + Vy^2
-    sqrt.s $f8, $f6             # Magnitude = sqrt(Vx^2 + Vy^2)
+    mul.s $f2, %Vx, %Vx	# Vx^2
+    mul.s $f4, %Vy, %Vy	# Vy^2
+    add.s $f6, $f2, $f4	# Vx^2 + Vy^2
+    sqrt.s $f8, $f6		# Magnitude = sqrt(Vx^2 + Vy^2)
 
     # Calculate time to travel 1 meter: t = 1 / Magnitude
-    l.s $f2, flt_one            # Distance to next pixel = 1 meter
-    div.s %dt, $f2, $f8         # t = 1 / Magnitude
+    l.s $f2, flt_one	# Distance to next pixel = 1 meter
+    div.s %dt, $f2, $f8	# t = 1 / Magnitude
 
     # Normalize velocity components
-    div.s $f6, %Vx, $f8         # Normalized Vx
-    div.s $f8, %Vy, $f8         # Normalized Vy
+    div.s $f6, %Vx, $f8	# Normalized Vx
+    div.s $f8, %Vy, $f8	# Normalized Vy
     
-    add.s eVx, eVx, $f6	  # Accumulate normalized velocities
+    add.s eVx, eVx, $f6	# Accumulate normalized velocities
     add.s eVy, eVy, $f8
     
-    sub.s eVx, eVx, px		  # subtract previous displacement
+    sub.s eVx, eVx, px	# subtract previous displacement
     sub.s eVy, eVy, py
 
     # Threshold for significant movement
-    l.s $f15, flt_threshold      # Threshold for movement decision (e.g., 0.5)
+    l.s $f15, flt_threshold	# Threshold for movement decision (e.g., 0.5)
     l.s $f21, flt_zero
 
     # Initialize Xf and Yf to current position
-    move %Xf, %Xi               # Default Xf = Xi
-    move %Yf, %Yi               # Default Yf = Yi
+    move %Xf, %Xi		# Default Xf = Xi
+    move %Yf, %Yi		# Default Yf = Yi
 
     # Determine X movement
-    abs.s $f4, eVx              # |Normalized Vx|
-    c.le.s $f15, $f4             # Check if |Vx| >= threshold
-    bc1f skip_x_movement        # Skip X movement if below threshold
-    c.lt.s eVx, $f21             # Check if Vx < 0
-    bc1t move_left              # Move left if true
-    addi %Xf, %Xi, 1            # Move right
-    mov.s px, $f2
+    abs.s $f4, eVx		# |Normalized Vx|
+    c.le.s $f15, $f4	# Check if |Vx| >= threshold
+    bc1f skip_x_movement	# Skip X movement if below threshold
+    c.lt.s eVx, $f21	# Check if Vx < 0
+    bc1t move_left		# Move left if true
+    addi %Xf, %Xi, 1	# Move right
+    l.s px, flt_one
     j done_x_movement
 
 move_left:
-    subi %Xf, %Xi, 1            # Move left
-    mov.s px, $f2
-    sub.s px, px, $f2
-    sub.s px, px, $f2
+    subi %Xf, %Xi, 1	# Move left
+    l.s px, flt_neg_one
     j done_x_movement
 
 skip_x_movement:
@@ -137,20 +131,18 @@ skip_x_movement:
 done_x_movement:
 
     # Determine Y movement
-    abs.s $f4, eVy              # |Normalized Vy|
-    c.le.s $f15, $f4             # Check if |Vy| >= threshold
-    bc1f skip_y_movement        # Skip Y movement if below threshold
-    c.lt.s eVy, $f21             # Check if Vy < 0
-    bc1t move_down              # Move down if true
-    addi %Yf, %Yi, 1            # Move up
-    mov.s py, $f2
+    abs.s $f4, eVy		# |Normalized Vy|
+    c.le.s $f15, $f4	# Check if |Vy| >= threshold
+    bc1f skip_y_movement	# Skip Y movement if below threshold
+    c.lt.s eVy, $f21	# Check if Vy < 0
+    bc1t move_down		# Move down if true
+    addi %Yf, %Yi, 1	# Move up
+    l.s py, flt_one
     j done_y_movement
 
 move_down:
-    subi %Yf, %Yi, 1            # Move down
-    mov.s py, $f2
-    sub.s py, py, $f2
-    sub.s py, py, $f2
+    subi %Yf, %Yi, 1	# Move down
+    l.s py, flt_neg_one
     j done_y_movement
 
 skip_y_movement:
