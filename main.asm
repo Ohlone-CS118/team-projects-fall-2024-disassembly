@@ -1,5 +1,13 @@
 # Main Program File
 
+# BITMAP DISPLAY RECOMMENDED SETTINGS
+# Unit Width in Pixels: 8
+# Unit Height in Pixels: 8
+# Display Width in Pixels: 512
+# Display Height in Pixels: 256
+# Base address for display: 0x10040000 (heap)
+
+
 .include "utilities.asm"
 
 .data
