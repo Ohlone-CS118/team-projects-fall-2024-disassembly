@@ -1,7 +1,7 @@
 .include "utilities.asm"
 
 .data
-	cutoff: .float  0.2617994
+	cutoff: .float  0.19634954
 
 .text
 
@@ -18,6 +18,7 @@ angle_aprox:
 	bc1f special_case_skip
 	special_case_skip:
 	div.s $f25, Vy, Vx
+	abs.s $f25, $f25
 	# Step 2: Compute second term (-x^3/3)
 	mul.s $f2, $f25, $f25	# f2 = x^2
 	mul.s $f2, $f2, $f25	# f2 = x^3
@@ -70,6 +71,8 @@ angle_aprox:
 																
 redraw_rocket:
 	push($t5)
+	pushfloat($f2)
+	pushfloat($f3)
 	pushfloat($f6)
 	push($ra)
 	
@@ -77,21 +80,43 @@ redraw_rocket:
 	subi $s0, $s0, 1
 	sub $t5, $s0, $t5	
 	
+	mov.s drawangle, angle
+	j not_third_quadrant
+	
+	mov.s $f2, drawangle
+	
+	li $s0, 1
+	l.s $f6, flt_zero
+	c.le.s $f6, Vx
+	bc1t not_second_third_quadrant
 	l.s $f6, pi
-	c.le.s drawangle, $f6
-	bc1t correct_angle
-	sub.s drawangle, drawangle, $f6
-	
-	correct_angle:
-	
+	sub.s drawangle, $f6, drawangle
+	addi $s0, $s0, 1
+not_second_third_quadrant:
+	l.s $f6, flt_zero
+	c.le.s $f6, Vy
+	bc1t not_third_fourth_quadrant
+	l.s $f6, twopi
+	sub.s drawangle, $f6, drawangle
+	addi $s0, $s0, 1
+not_third_fourth_quadrant:
+	l.s $f6, flt_three
+	mtc1 $s0, $f3
+	cvt.s.w $f3, $f3
+	c.le.s $f6, $f3
+	bc1t not_third_quadrant
+	mov.s drawangle, $f2
+	l.s $f6, pi
+	add.s drawangle, drawangle, $f6
+not_third_quadrant:
 	l.s $f29, cutoff
 	l.s $f28, cutoff
+	add.s $f28, $f28, $f28
 	c.le.s drawangle, $f29
 	bc1t rocket_1
 	add.s $f29, $f29, $f28
 	c.le.s drawangle, $f29
 	bc1t rocket_2
-	add.s $f29, $f29, $f28
 	add.s $f29, $f29, $f28
 	c.le.s drawangle, $f29
 	bc1t rocket_3
@@ -99,14 +124,11 @@ redraw_rocket:
 	c.le.s drawangle, $f29
 	bc1t rocket_4
 	add.s $f29, $f29, $f28
-	add.s $f29, $f29, $f28
-	c.le.s drawangle, $f29
 	c.le.s drawangle, $f29
 	bc1t rocket_5
 	add.s $f29, $f29, $f28
 	c.le.s drawangle, $f29
 	bc1t rocket_6
-	add.s $f29, $f29, $f28
 	add.s $f29, $f29, $f28
 	c.le.s drawangle, $f29
 	bc1t rocket_7
@@ -138,6 +160,8 @@ redraw_rocket:
 rocket_end:
 	pop($ra)
 	popfloat($f6)
+	popfloat($f3)
+	popfloat($f2)
 	pop($t5)
 	jr $ra
 

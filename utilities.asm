@@ -9,8 +9,10 @@
 	flt_five: .float 5.0
 	flt_seven: .float 7.0
 	flt_nine: .float 9.0
+	flt_hundredeighty: .float 180.0
 	
 	pi: .float 3.14159265
+	twopi: .float 6.2831853
 	
 	grav_const: .float 9.80
 	flt_threshold: .float 0.5

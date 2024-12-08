@@ -14,11 +14,6 @@
 start_angle: .float 1.570796    # 90 degrees in radians
 radianoffset: .float 0.26179
 
-# Output placeholders
-output_Xf: .word 0           # Final X coordinate
-output_Yf: .word 0           # Final Y coordinate
-output_t: .float 0.0         # Time to next pixel
-
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
 welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
 retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
@@ -30,6 +25,7 @@ success_message: .asciiz "\nLevel Complete\n"
 msg_Xf: .asciiz "\nFinal X: "
 msg_Yf: .asciiz "  Final Y: "
 msg_t:  .asciiz "  Time to next pixel: "
+msg_angle:  .asciiz "  Angle: "
 
 .text
 
@@ -141,7 +137,7 @@ level_one_loop:
     	#if correct building collision, end loop, level succeeded
 	
 	# estimate rocket angle
-	jal angle_aprox
+	#jal angle_aprox
 	
 	# draw rocket at new coodinates
 	li $a2, DARK_GREEN
@@ -172,30 +168,41 @@ exit:
 	syscall
 	
 print_status:
+	pushfloat($f6)
 	pushfloat($f12)
-	sw xf, output_Xf	# Store final X coordinate
-	sw yf, output_Yf	# Store final Y coordinate
-	s.s dt, output_t	# Store time to next pixel as float
+	
 	# Print results
 	li $v0, 4		# Print string syscall
 	la $a0, msg_Xf	# Message: "Final X: "
 	syscall
 	li $v0, 1		# Print integer syscall
-	lw $a0, output_Xf	# Load final X
+	move $a0, xf	# Load final X
 	syscall
 	li $v0, 4		# Print string syscall
 	la $a0, msg_Yf	# Message: "Final Y: "
 	syscall
 	li $v0, 1		# Print integer syscall
-	lw $a0, output_Yf	# Load final Y
+	move $a0, yf	# Load final Y
 	syscall
 	li $v0, 4		# Print string syscall
 	la $a0, msg_t	# Message: "Time to next pixel: "
 	syscall
 	li $v0, 2		# Print float syscall
-	l.s $f12, output_t	# Load time to next pixel
+	mov.s $f12, dt	# Load time to next pixel
 	syscall
+	li $v0, 4		# Print string syscall
+	la $a0, msg_angle	# Message: "Angle: "
+	syscall
+	li $v0, 2		# Print float syscall
+	mov.s $f12, angle	# angle
+	l.s $f6, flt_hundredeighty
+	mul.s $f12, $f12, $f6
+	l.s $f6, pi
+	div.s $f12, $f12, $f6
+	syscall
+	
 	popfloat($f12)
+	popfloat($f6)
 	jr $ra
 	
 
@@ -296,18 +303,18 @@ __keyboard_interrupt:
 	lw $k1, 0xffff0004  # Store content of the memory mapped receiver data register in $k1.
 	# Use the MARS built-in system call 11 (print char) to print the character
 	# from receiver data.
-	beq $t0, $k1, holdCounter	# if key pressed is the same as previous key pressed
-	li $s2, 1 # reset hold counter to 1
-	j notHolding	
-holdCounter:
-	addi $s2, $s2, 1		# hold counter++
+	#beq $t0, $k1, holdCounter	# if key pressed is the same as previous key pressed
+	#li $s2, 1 # reset hold counter to 1
+	#j notHolding	
+#holdCounter:
+	#addi $s2, $s2, 1		# hold counter++
 
-notHolding:
-	move $t0, $k1	# save current character to next comparison
+#notHolding:
+	#move $t0, $k1	# save current character to next comparison
 	
-	li $v0, 11 		# print the character entered 
-	move $a0, $k1 
-	syscall       
+	#li $v0, 11 		# print the character entered 
+	#move $a0, $k1 
+	#syscall       
 
 	beq $k1, '1', yes_no
 	beq $k1, '0', yes_no
@@ -317,13 +324,13 @@ notHolding:
 	beq $k1, 'd', dInput
 	
 	# example for holding detection
-	beq $k1, '2', pressed2 # if key 2 is being pressed
+	#beq $k1, '2', pressed2 # if key 2 is being pressed
 
-pressed2:
-	bge $s2, $s3, held2 # if key 2 is being held
+#pressed2:
+	#bge $s2, $s3, held2 # if key 2 is being held
 	#pressed2 content
 
-held2:
+#held2:
 	#held2 content
 
 yes_no:
