@@ -75,7 +75,6 @@ level_one:
 	
 	# load starting rocket conditions
 	l.s newangle, start_angle
-	l.s drawangle, start_angle
 	li newT, 520
 	li M, 50
 	
@@ -92,6 +91,7 @@ level_one:
 	li yi, 5
 	
 	# draw rocket
+	mov.s drawangle, newangle
 	li $a2, DARK_GREEN
 	jal redraw_rocket
 
@@ -140,6 +140,7 @@ level_one_loop:
 	#jal angle_aprox
 	
 	# draw rocket at new coodinates
+	mov.s drawangle, angle
 	li $a2, DARK_GREEN
 	jal redraw_rocket  
 
@@ -342,8 +343,10 @@ wInput:
 	j __resume
 
 aInput:
+	pushfloat($f30)
 	l.s $f30, radianoffset
 	add.s newangle, newangle, $f30
+	popfloat($f30)
 	j __resume
 
 sInput:
@@ -353,8 +356,10 @@ sInputSkip:
 	j __resume
 
 dInput:
+	pushfloat($f30)
 	l.s $f30, radianoffset
 	sub.s newangle, newangle, $f30
+	popfloat($f30)
 	j __resume
 
 __resume_from_exception: 

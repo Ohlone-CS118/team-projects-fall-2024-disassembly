@@ -80,11 +80,10 @@ redraw_rocket:
 	subi $s0, $s0, 1
 	sub $t5, $s0, $t5	
 	
-	mov.s drawangle, angle
 	j not_third_quadrant
 	
+	## below is not functional
 	mov.s $f2, drawangle
-	
 	li $s0, 1
 	l.s $f6, flt_zero
 	c.le.s $f6, Vx
@@ -108,6 +107,7 @@ not_third_fourth_quadrant:
 	mov.s drawangle, $f2
 	l.s $f6, pi
 	add.s drawangle, drawangle, $f6
+	## ## ## ## ##
 not_third_quadrant:
 	l.s $f29, cutoff
 	l.s $f28, cutoff
