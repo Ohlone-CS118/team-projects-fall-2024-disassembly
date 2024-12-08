@@ -68,24 +68,28 @@ main:
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
 # waiting for input
+	beq $a0, '1', level_one
+	beq $a0, '0', exit
 	j level_one_prompt_loop
 
 
 # LEVEL 1
 level_one:
-	#j __resume
+	# print entrance message
 	li $v0, 4
 	la $a0, level_one_message
 	syscall
 
+	# draw background
 	jal background
 
-	l.s $f0, start_angle # Load angle into $f0
-	li $t1, 1000       # Load starting thrust into $t1
-	li $t2, 50         # Load mass into $t2
-
-	li $t4, 10	# starting coords
-	li $t5, 5
+	l.s angle, start_angle # Load angle into $f0
+	li T, 1000       # Load starting thrust into $t1
+	li M, 50         # Load mass into $t2
+	
+	# set starting coords
+	li xi, 10	
+	li yi, 5
 	
 	# draw rocket
 	li $a2, DARK_GREEN
@@ -132,15 +136,15 @@ level_one_loop:
 	li $a2, SHADEDBLUE
 	jal redraw_rocket
 
-	move $t4, $t6 # set $t4 to $t6 (set x coord to new x)
-	move $t5, $t7 # set $t5 to $t7 (set y coord to new y)
+	move xi, xf # set $t4 to $t6 (set x coord to new x)
+	move yi, yf # set $t5 to $t7 (set y coord to new y)
 	
 	# error collision
 	#if out of bounds collision, end loop, level failed
-	blt $t5, 1, out_of_bounds
-	bgt $t5, 32, out_of_bounds
-	blt $t4, 0, out_of_bounds
-	bgt $t4, 63, out_of_bounds
+	blt yi, 1, out_of_bounds
+	bgt yi, 32, out_of_bounds
+	blt xi, 0, out_of_bounds
+	bgt xi, 63, out_of_bounds
 	
 	#if incorrect building collision, end loop, level failed
     	#if correct building collision, end loop, level succeeded
@@ -160,6 +164,8 @@ out_of_bounds:
 	
 	# loop to check if user entered Y, N, enter
 retry_prompt_loop:
+	beq $a0, '1', level_one
+	beq $a0, '0', exit
 	# waiting for input
 	j retry_prompt_loop
 
@@ -283,9 +289,8 @@ __keyboard_interrupt:
 	syscall       
 
 
-beq $k1, '1', level_one
-beq $k1, '0', exit
-
+beq $k1, '1', yes_no
+beq $k1, '0', yes_no
 beq $k1, 'w', wInput
 beq $k1, 'a', aInput
 beq $k1, 's', sInput
@@ -300,6 +305,10 @@ bge $s2, $s3, held2 # if key 2 is being held
 
 held2:
 #held2 content
+
+yes_no:
+move $a0, $k1
+j __resume
 
 wInput:
 addi $t1, $t1, 10
