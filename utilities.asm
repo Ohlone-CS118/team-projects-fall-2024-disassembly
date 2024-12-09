@@ -7,19 +7,21 @@
 	flt_half: .float 0.5
 	flt_zero: .float 0.0
 	
-	flt_three: .float 3.0
-	flt_five: .float 5.0
-	flt_seven: .float 7.0
-	flt_nine: .float 9.0
-	flt_hundredeighty: .float 180.0
+	# angles
+	pi: .float 3.14159265	# pi in radians
+	twopi: .float 6.2831853	# 2pi in radians
+	start_angle: .float 1.570796	# 90 degrees in radians
+	radianoffset: .float 0.26179	# 22.5 degrees in radians
 	
-	pi: .float 3.14159265
-	twopi: .float 6.2831853
-	
+	# rocketmath constants
 	grav_const: .float 9.80
 	flt_threshold: .float 0.5
 	
+	# other constants
 	millisecond: .float 1000
+	flt_hundredeighty: .float 180.0
+	
+	
 
 define:
 	# screen information

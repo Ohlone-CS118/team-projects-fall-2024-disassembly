@@ -10,22 +10,19 @@
 .include "utilities.asm"
 
 .data
-
-start_angle: .float 1.570796    # 90 degrees in radians
-radianoffset: .float 0.26179
-
-welcome_message: .asciiz "Welcome to our program! Insert information here. "
-welcome_prompt: .asciiz "\n\nWould you like to participate? Type 1 for yes or 0 for no: "
-retry_prompt: .asciiz "\n\nWould you like to retry? Type 1 for yes or 0 for no: "
-exit_message: .asciiz "\n\nExiting program..."
-error_message: .asciiz "\n\nExiting due to errors..."
-level_one_message: .asciiz "\nLevel 1: \n\n"
-fail_message: .asciiz "\nLevel Failed\n"
-success_message: .asciiz "\nLevel Complete\n"
-msg_Xf: .asciiz "\nFinal X: "
-msg_Yf: .asciiz "  Final Y: "
-msg_t:  .asciiz "  Time to next pixel: "
-msg_angle:  .asciiz "  Angle: "
+	# messages
+	welcome_message: .asciiz "Welcome to our program! Insert information here. "
+	welcome_prompt: .asciiz "\n\nWould you like to participate? Type 1 for yes or 0 for no: "
+	retry_prompt: .asciiz "\n\nWould you like to retry? Type 1 for yes or 0 for no: "
+	exit_message: .asciiz "\n\nExiting program..."
+	error_message: .asciiz "\n\nExiting due to errors..."
+	level_one_message: .asciiz "\nLevel 1: \n\n"
+	fail_message: .asciiz "\nLevel Failed\n"
+	success_message: .asciiz "\nLevel Complete\n"
+	msg_Xf: .asciiz "\nNext X: "
+	msg_Yf: .asciiz "  Next Y: "
+	msg_t:  .asciiz "  Time to next pixel: "
+	msg_angle:  .asciiz "  Angle: "
 
 .text
 
@@ -49,16 +46,18 @@ main:
 	# Update the memory mapped receiver control register
 	sw $s1, 0xffff0000
 
+
+	# print welcome message and prompt
 	li $v0, 4
 	la $a0, welcome_message
 	syscall
-
 	la $a0, welcome_prompt
 	syscall
 
 # loop to check if user entered Y, N, enter
 level_one_prompt_loop:
-	# waiting for input
+	# waiting for keyboard interrupt
+	# if $a0 is set to respective value from interrupt, jump to location
 	beq $a0, 1, level_one
 	beq $a0, 2, exit
 	j level_one_prompt_loop
@@ -112,8 +111,8 @@ level_one_loop:
 	cvt.w.s dt, dt		# convert to word
 	push($a0)			# store $a0 temporarily
 	mfc1 $a0, dt		# move converted time to $a0
-	blt $a0, 1000, dont_limit_time
-	li $a0, 1000
+	blt $a0, 1000, dont_limit_time # if time is not more than 1 second
+	li $a0, 1000		# if it is, set it to 1 second to avoid waiting
 	dont_limit_time:
 	li $v0, 32		# set syscall to sleep based on time in milliseconds in $a0
 	syscall
@@ -123,8 +122,8 @@ level_one_loop:
 	li $a2, SHADEDBLUE
 	jal redraw_rocket
 
-	move xi, xf # set $t4 to $t6 (set x coord to new x)
-	move yi, yf # set $t5 to $t7 (set y coord to new y)
+	move xi, xf # set x coord to new x coord
+	move yi, yf # set y coord to new y coord
 	
 	# error collision
 	#if out of bounds collision, end loop, level failed
@@ -133,9 +132,10 @@ level_one_loop:
 	blt xi, 0, out_of_bounds
 	bgt xi, 63, out_of_bounds
 	
+	# WIP
 	#if incorrect building collision, end loop, level failed
     	#if correct building collision, end loop, level succeeded
-	
+    	
 	# estimate rocket angle
 	#jal angle_aprox
 	
@@ -143,21 +143,23 @@ level_one_loop:
 	mov.s drawangle, angle
 	li $a2, DARK_GREEN
 	jal redraw_rocket  
-
+	
 	j level_one_loop
 
 out_of_bounds:
+	# display level failed message and retry prompt
 	li $v0, 4
 	la $a0, fail_message
 	syscall
 	la $a0, retry_prompt
 	syscall
 	
-	# loop to check if user entered Y, N, enter
+# loop to check if user entered Y, N, enter
 retry_prompt_loop:
+	# waiting for keyboard interrupt
+	# if $a0 is set to respective value from interrupt, jump to location
 	beq $a0, 1, level_one
 	beq $a0, 2, exit
-	# waiting for input
 	j retry_prompt_loop
 
 exit:
@@ -168,6 +170,7 @@ exit:
 	li $v0, 10
 	syscall
 	
+# subroutine to print rocket data for next position
 print_status:
 	pushfloat($f6)
 	pushfloat($f12)
@@ -195,9 +198,10 @@ print_status:
 	la $a0, msg_angle	# Message: "Angle: "
 	syscall
 	li $v0, 2		# Print float syscall
-	mov.s $f12, angle	# angle
+	mov.s $f12, angle	# Load angle
+	# convert angle to degrees from radians (angle * 180/pi)
 	l.s $f6, flt_hundredeighty
-	mul.s $f12, $f12, $f6
+	mul.s $f12, $f12, $f6 
 	l.s $f6, pi
 	div.s $f12, $f12, $f6
 	syscall
@@ -353,10 +357,8 @@ wInput:
 	j __resume
 
 aInput:
-	#pushfloat($f30)
 	l.s $f30, radianoffset
 	add.s newangle, newangle, $f30
-	#popfloat($f30)
 	j __resume
 
 sInput:
@@ -366,10 +368,8 @@ sInputSkip:
 	j __resume
 
 dInput:
-	#pushfloat($f30)
 	l.s $f30, radianoffset
 	sub.s newangle, newangle, $f30
-	#popfloat($f30)
 	j __resume
 
 __resume_from_exception: 
