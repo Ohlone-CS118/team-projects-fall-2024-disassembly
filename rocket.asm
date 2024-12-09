@@ -109,6 +109,21 @@ not_third_fourth_quadrant:
 	add.s drawangle, drawangle, $f6
 	## ## ## ## ##
 not_third_quadrant:
+	l.s $f29, pi
+	c.le.s drawangle, $f29
+	bc1t corrected_angle_1
+	sub.s drawangle, drawangle, $f29
+	j not_third_quadrant
+corrected_angle_1:
+	l.s $f29, flt_zero
+	c.le.s $f29, drawangle
+	bc1t corrected_angle_2
+	# abs value then subtract from pi
+	abs.s drawangle, drawangle
+	l.s $f29, pi
+	sub.s drawangle, $f29, drawangle
+	j not_third_quadrant
+corrected_angle_2:
 	l.s $f29, cutoff
 	l.s $f28, cutoff
 	add.s $f28, $f28, $f28
