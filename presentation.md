@@ -3,7 +3,20 @@ marp: true
 theme: default
 ---
 
-# Create New Slides Up Here 
+# Team Disassembly
+"Operation Ironwing"
+Danny Huang, Mohammed Aziz Quraishi, Anthony Ryabov, Zahid Khan
+
+---
+
+# Rationale
+Inspired by UN SDG 16 "Peace and Justice," our goal is to promote peaceful and inclusive societies by exposing the user to the stark contrast of a dystopian society where war and suffering is commonplace, and in which the user is complacent and involved in unmitigated violence and mass destruction.
+
+---
+
+# The Game
+
+The user will be given control of an Intercontinental Ballistic Missile (ICBM), whose goal will be to eradicate a designated target. Though the scheme of gameplay is straightforward, the user will be exposed to substantial amounts of suggestions that what they are doing is not quite morally or ethically correct (death toll numbers, lack of consequences, visually non-militant targets, etc).
 
 ---
 
