@@ -1,5 +1,7 @@
-.data
+# Implemented by Anthony Ryabov
 
+.data
+	# Important constants
 	flt_neg_one: .float -1.0
 	flt_one: .float 1.0
 	flt_half: .float 0.5
@@ -20,13 +22,12 @@
 	millisecond: .float 1000
 
 define:
-# screen information
-	.eqv PIXEL_SIZE 4
-	.eqv WIDTH 64 # 64
-	.eqv HEIGHT 64 # 32
+	# screen information
+	.eqv WIDTH 64
+	.eqv HEIGHT 64
 	.eqv DISPLAY 0x10040000
 
-# the colors used in my artwork
+	# colors used
 	.eqv BLACK	0x00000000
 	#eqv ORANGE	0x00FF8000
 	.eqv YELLOW	0x00FFFF00
@@ -37,8 +38,10 @@ define:
 	.eqv BROWN	0x00663300
 	#.eqv RED		0x00FF0000
 	.eqv SHADEDBLUE	0x00CCCCFF	
-	.eqv DARK_GREEN 0x00003300
+	.eqv DARK_GREEN	0x00003300
 	
+	# register names/equivalencies 
+	# warning: not organized
 	.eqv newangle $f27
 	.eqv angle $f0
 	.eqv drawangle $f23
@@ -60,16 +63,13 @@ define:
 	.eqv py $f13
 	.eqv eVx $f7
 	.eqv eVy $f9
-	# Blacklisted FPU registers: f2, f4, f6, f7, f8, f9, $f11, $f13
-
+	
 .macro draw_pixel(%x, %y, %color)
-	#push($t0)
 	mul $t0, %y, WIDTH	# the product from (y * WIDTH)
 	add $t0, %x, $t0	# (x + (y * WIDTH))
 	mul $t0, $t0, 4	# 4 * (x + (y * WIDTH)), 4 bytes in one word
 	add $t0, $t0, DISPLAY
 	sw %color, 0($t0)
-	#pop($t0)
 .end_macro
 
 .macro push(%reg)
