@@ -12,14 +12,6 @@ arctan_table: .float 0.785398163, 0.463647609, 0.244978663, 0.124354995, 0.06241
 
 scaling_factor: .float 0.607252935 # Scaling factor K
 
-flt_neg_one: .float -1.0
-flt_one: .float 1.0
-flt_half: .float 0.5
-flt_zero: .float 0.0
-
-pi: .float 3.14159265
-
-#testconst: .float 0.0
 thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
 
 .text
@@ -45,8 +37,8 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
     push($t0)
     push($t1)
     push($t2)
-    push($a0)
-    push($a1)
+    push($t8) #a0
+    push($t9) #a1
     # Initialize variables
     l.s $f2, scaling_factor   # x = K (cosine component)
     l.s $f3, flt_zero         # y = 0 (sine component)
@@ -59,10 +51,10 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         bge $t0, $t1, CORDIC_DONE_M0
 
         # Load arctan(2^-i) for this iteration
-        la $a0, arctan_table
+        la $t8, arctan_table
         mul $t2, $t0, 4           # Index into the table (4 bytes per float)
-        add $a1, $a0, $t2
-        l.s $f10, 0($a1)          # arctan(2^-i) -> $f10
+        add $t9, $t8, $t2
+        l.s $f10, 0($t9)          # arctan(2^-i) -> $f10
 
         # Determine direction of rotation (d_i)
         l.s $f30, flt_zero        # Load 0.0 into $f30
@@ -110,8 +102,8 @@ thrustconst: .float 1       # Thrust scaling value of 1 for unscaled testing
         # mul.s $f3, $f3, %thrust    # Final sine value scaled
         mov.s %cosine, $f2           # Cosine in %cosine
         mov.s %sine, $f3             # Sine in %sine
-        pop($a1)
-        pop($a0)
+        pop($t9)
+        pop($t8)
         pop($t2)
         pop($t1)
         pop($t0)

@@ -1,13 +1,35 @@
+# Implemented by Anthony Ryabov
+
 .data
+	# Important constants
+	flt_neg_one: .float -1.0
+	flt_one: .float 1.0
+	flt_half: .float 0.5
+	flt_zero: .float 0.0
+	
+	# angles
+	pi: .float 3.14159265	# pi in radians
+	twopi: .float 6.2831853	# 2pi in radians
+	start_angle: .float 1.570796	# 90 degrees in radians
+	radianoffset: .float 0.26179	# 22.5 degrees in radians
+	
+	# rocketmath constants
+	grav_const: .float 9.80
+	flt_threshold: .float 0.5
+	
+	# other constants
+	millisecond: .float 1000
+	flt_hundredeighty: .float 180.0
+	
+	
 
 define:
-# screen information
-	.eqv PIXEL_SIZE 4
+	# screen information
 	.eqv WIDTH 64
-	.eqv HEIGHT 32
-	.eqv DISPLAY 0x10010000
+	.eqv HEIGHT 64
+	.eqv DISPLAY 0x10040000
 
-# the colors used in my artwork
+	# colors used
 	.eqv BLACK	0x00000000
 	#eqv ORANGE	0x00FF8000
 	.eqv YELLOW	0x00FFFF00
@@ -15,16 +37,41 @@ define:
 	#.eqv GREY	0x00808080
 	#.eqv BLUE	0x003399FF
 	.eqv GREEN	0x0000CC00
-	#.eqv BROWN	0x00663300
+	.eqv BROWN	0x00663300
 	#.eqv RED		0x00FF0000
 	.eqv SHADEDBLUE	0x00CCCCFF	
-	.eqv DARK_GREEN 0x00003300
-
+	.eqv DARK_GREEN	0x00003300
+	
+	# register names/equivalencies 
+	# warning: not organized
+	.eqv newangle $f27
+	.eqv angle $f0
+	.eqv drawangle $f23
+	.eqv ax $f1 
+	.eqv ay $f3 
+	.eqv Tx $f5 
+	.eqv Ty $f10 
+	.eqv Vx $f12 
+	.eqv Vy $f14 
+	.eqv dt $f16 
+	.eqv T $t1
+	.eqv newT $t3
+	.eqv M $t2 
+	.eqv xi $t4 
+	.eqv yi $t5 
+	.eqv xf $t6 
+	.eqv yf $t7
+	.eqv px $f11
+	.eqv py $f13
+	.eqv eVx $f7
+	.eqv eVy $f9
+	
 .macro draw_pixel(%x, %y, %color)
-	mul $s1, %y, WIDTH	# the product from (y * WIDTH)
-	add $s1, %x, $s1	# (x + (y * WIDTH))
-	mul $s1, $s1, 4	# 4 * (x + (y * WIDTH)), 4 bytes in one word
-	sw %color, DISPLAY($s1)
+	mul $t0, %y, WIDTH	# the product from (y * WIDTH)
+	add $t0, %x, $t0	# (x + (y * WIDTH))
+	mul $t0, $t0, 4	# 4 * (x + (y * WIDTH)), 4 bytes in one word
+	add $t0, $t0, DISPLAY
+	sw %color, 0($t0)
 .end_macro
 
 .macro push(%reg)
