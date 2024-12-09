@@ -38,6 +38,7 @@ $$
 $$
 
 In component form, these vectors are:
+
 $$
 \begin{align}
 \vec{T}&=T_x\hat i+T_y\hat j\\
