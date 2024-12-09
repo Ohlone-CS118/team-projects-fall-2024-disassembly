@@ -1,6 +1,8 @@
+# Implemented by Anthony Ryabov and Yueheng "Danny" Huang
+
 # Main Program File
 
-# BITMAP DISPLAY RECOMMENDED SETTINGS
+# BITMAP DISPLAY SETTINGS
 # Unit Width in Pixels: 8
 # Unit Height in Pixels: 8
 # Display Width in Pixels: 512
