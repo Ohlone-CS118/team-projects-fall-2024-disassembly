@@ -27,8 +27,6 @@
 .text
 
 .globl main
-.globl level_one
-.globl exit
 
 main:
 	# set up keyboard input detection through interrupts
