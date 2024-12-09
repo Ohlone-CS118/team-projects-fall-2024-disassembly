@@ -172,11 +172,14 @@ CORDIC_LOOP_M0:
 
 For each step $i$, the angle of rotation $\theta_i = \arctan(2^{-i})$ is used to update coordinates.
 The new vector coordinates after the rotation are calculated as:
-$$\begin{aligned}
+
+$$
+\begin{aligned}
 x_{i+1} &= x_i - d_i \cdot y_i \cdot 2^{-i} \\
 y_{i+1} &= y_i + d_i \cdot x_i \cdot 2^{-i} \\
 \theta_{i+1} &= \theta_i - d_i \cdot \theta_i
-\end{aligned}$$
+\end{aligned}
+$$
 
 ```MIPS
 # x = x - d * y * 2^-i
