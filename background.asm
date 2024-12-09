@@ -1,3 +1,5 @@
+# Implemented by Zahid Khan
+
 .include "utilities.asm"
 
 .text
@@ -22,8 +24,8 @@ background:
 #------------------------------GRASS------------------------------------------#
 	
 	li $a0, 0		# x-coordinate 
-	li $a1, 61	# y-coordinate 58
-	li $a3, 192	# length of the grass line (entire width) 128
+	li $a1, 61	# y-coordinate
+	li $a3, 192	# length of the grass line (entire width)
 	li $a2, BROWN	# grass color
 	jal draw_horizontal_line
 	
@@ -31,45 +33,45 @@ background:
 
 	# BUILDING 1
 	
+	li $a1, 48	# y-coordinate
+	li $a0, 58	# x-coordinate
 	li $a2, BLACK	# building color
 	li $a3, 15	# height of building
-	li $a1, 48	# y-coordinate 30
-	li $a0, 58	# x-coordinate
 	jal draw_vertical_line
-	li $a0, 59
+	li $a0, 59	# x-coordinate
 	jal draw_vertical_line
-	li $a0, 60
+	li $a0, 60	# x-coordinate
 	jal draw_vertical_line
-	li $a0, 61
+	li $a0, 61	# x-coordinate
 	jal draw_vertical_line
 	
 	li $a2, YELLOW	# color
-	li $a0, 59	# x-coordinate 59 
-	li $a1, 50	# y-coordinate 18
+	li $a0, 59	# x-coordinate
+	li $a1, 50	# y-coordinate
 	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
-	li $a0, 60	# x-coordinate 60
-	li $a1, 50	# y-coordinate 18
+	li $a0, 60	# x-coordinate
+	li $a1, 50	# y-coordinate
 	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
-	li $a0, 59	# x-coordinate 59
-	li $a1, 52	# y-coordinate 20
+	li $a0, 59	# x-coordinate
+	li $a1, 52	# y-coordinate
 	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
-	li $a0, 59	# x-coordinate 59
-	li $a1, 52	# y-coordinate 20
+	li $a0, 59	# x-coordinate
+	li $a1, 52	# y-coordinate
 	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
-	li $a0, 60	# x-coordinate 60
-	li $a1, 54	# y-coordinate 22
+	li $a0, 60	# x-coordinate
+	li $a1, 54	# y-coordinate
 	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
-	li $a0, 60	# x-coordinate 60
-	li $a1, 54	# y-coordinate 22
+	li $a0, 60	# x-coordinate
+	li $a1, 54	# y-coordinate
 	draw_pixel($a0, $a1, $a2)	# calls draw_pixel
 	
 	#######################################################
 	# BUILDING 2
 	
-	li $a3, 20	# height of building
-	li $a2, BLACK	# building color
-	li $a1, 43	# y-coordinate
 	li $a0, 47	# x-coordinate
+	li $a1, 43	# y-coordinate
+	li $a2, BLACK	# building color
+	li $a3, 20	# height of building
 	jal draw_vertical_line
 	li $a0, 48	# x-coordinate
 	jal draw_vertical_line
@@ -109,10 +111,10 @@ background:
 	#######################################################
 	# BUILDING 3
 	
-	li $a3, 18	# height of building
-	li $a2, BLACK	# building color
 	li $a0, 39	# x-coordinate
 	li $a1, 45	# y-coordinate
+	li $a2, BLACK	# building color
+	li $a3, 18	# height of building
 	jal draw_vertical_line
 	li $a0, 40	# x-coordinate
 	jal draw_vertical_line
@@ -161,10 +163,11 @@ background:
 	#######################################################
 	# BUILDING 4
 	
-	li $a1, 40	# y-coordinate
 	li $a0, 30	# x-coordinate
-	li $a3, 23	# height of building
+	li $a1, 40	# y-coordinate
 	li $a2, BLACK	# building color
+	li $a3, 23	# height of building
+	
 	jal draw_vertical_line
 	li $a0, 31	# x-coordinate
 	jal draw_vertical_line
@@ -224,8 +227,8 @@ background:
 	
 	li $a0, 21	# x-coordinate
 	li $a1, 50	# y-coordinate
-	li $a3, 13	# height of building
 	li $a2, BLACK	# building color
+	li $a3, 13	# height of building
 	jal draw_vertical_line
 	li $a0, 22	# x-coordinate
 	jal draw_vertical_line
