@@ -63,10 +63,13 @@ define:
 	# Blacklisted FPU registers: f2, f4, f6, f7, f8, f9, $f11, $f13
 
 .macro draw_pixel(%x, %y, %color)
-	mul $s1, %y, WIDTH	# the product from (y * WIDTH)
-	add $s1, %x, $s1	# (x + (y * WIDTH))
-	mul $s1, $s1, 4	# 4 * (x + (y * WIDTH)), 4 bytes in one word
-	sw %color, DISPLAY($s1)
+	#push($t0)
+	mul $t0, %y, WIDTH	# the product from (y * WIDTH)
+	add $t0, %x, $t0	# (x + (y * WIDTH))
+	mul $t0, $t0, 4	# 4 * (x + (y * WIDTH)), 4 bytes in one word
+	add $t0, $t0, DISPLAY
+	sw %color, 0($t0)
+	#pop($t0)
 .end_macro
 
 .macro push(%reg)

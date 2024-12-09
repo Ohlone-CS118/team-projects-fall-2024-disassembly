@@ -247,6 +247,7 @@ print_status:
 .ktext 0x80000180  
    
 __kernel_entry_point:
+	move $s7, $1	# SAVE $at TEMPORARILY
 	mfc0 $k0, $13		# Get value in cause register.
 	andi $k1, $k0, 0x00007c	# Mask all but the exception code (bits 2 - 6) to zero.
 	srl  $k1, $k1, 2	# Shift two bits to the right to get the exception code. 
@@ -352,10 +353,10 @@ wInput:
 	j __resume
 
 aInput:
-	pushfloat($f30)
+	#pushfloat($f30)
 	l.s $f30, radianoffset
 	add.s newangle, newangle, $f30
-	popfloat($f30)
+	#popfloat($f30)
 	j __resume
 
 sInput:
@@ -365,10 +366,10 @@ sInputSkip:
 	j __resume
 
 dInput:
-	pushfloat($f30)
+	#pushfloat($f30)
 	l.s $f30, radianoffset
 	sub.s newangle, newangle, $f30
-	popfloat($f30)
+	#popfloat($f30)
 	j __resume
 
 __resume_from_exception: 
@@ -397,4 +398,5 @@ __resume_from_exception:
 __resume:
 	# Use the eret (Exception RETurn) instruction to set the program counter
 	# (PC) to the value saved in the ECP register (register 14 in coporcessor 0).
+	move $1, $s7 	# RESTORE $at
 	eret # Look at the value of $14 in Coprocessor 0 before single stepping.
