@@ -1,3 +1,5 @@
+# Implemented by Anthony Ryabov and Zahid Khan
+
 .include "utilities.asm"
 
 .data
@@ -5,70 +7,8 @@
 
 .text
 
-.globl angle_aprox
 .globl redraw_rocket
-
-angle_aprox:
-	pushfloat($f2)
-	pushfloat($f3)
-	pushfloat($f25)
-	l.s $f25, flt_zero
-	#c.eq.s Vx, $f25
-	
-	bc1f special_case_skip
-	special_case_skip:
-	div.s $f25, Vy, Vx
-	abs.s $f25, $f25
-	# Step 2: Compute second term (-x^3/3)
-	mul.s $f2, $f25, $f25	# f2 = x^2
-	mul.s $f2, $f2, $f25	# f2 = x^3
-	l.s $f3, flt_three		# f3 = 3.0
-	div.s $f2, $f2, $f3		# f2 = x^3/3
-	mov.s drawangle, $f25	# f23 = x
-	sub.s drawangle, drawangle, $f2 # f23 = x - x^3/3
-	# Step 3: Compute third term (+x^5/5)
-	mul.s $f2, $f25, $f25	# f2 = x^2
-	mul.s $f2, $f2, $f25	# f2 = x^3
-	mul.s $f2, $f2, $f25	# f2 = x^4
-	mul.s $f2, $f2, $f25	# f2 = x^5
-	l.s $f3, flt_five		# f3 = 5.0
-	div.s $f2, $f2, $f3		# f2 = x^5/5
-	add.s drawangle drawangle, $f2 # f23 = x - x^3/3 + x^5/5
-	# Step 3: Compute third term (-x^7/7)
-	mul.s $f2, $f25, $f25	# f2 = x^2
-	mul.s $f2, $f2, $f25	# f2 = x^3
-	mul.s $f2, $f2, $f25	# f2 = x^4
-	mul.s $f2, $f2, $f25	# f2 = x^5
-	mul.s $f2, $f2, $f25	# f2 = x^6
-	mul.s $f2, $f2, $f25	# f2 = x^7
-	l.s $f3, flt_seven		# f3 = 7.0
-	div.s $f2, $f2, $f3		# f2 = x^7/7
-	sub.s drawangle, drawangle, $f2 # f23 = x - x^3/3 + x^5/5 - x^7/7
-	# Step 3: Compute third term (+x^9/9)
-	mul.s $f2, $f25, $f25	# f2 = x^2
-	mul.s $f2, $f2, $f25	# f2 = x^3
-	mul.s $f2, $f2, $f25	# f2 = x^4
-	mul.s $f2, $f2, $f25	# f2 = x^5
-	mul.s $f2, $f2, $f25	# f2 = x^6
-	mul.s $f2, $f2, $f25	# f2 = x^7
-	mul.s $f2, $f2, $f25	# f2 = x^8
-	mul.s $f2, $f2, $f25	# f2 = x^9
-	l.s $f3, flt_nine		# f3 = 9.0
-	div.s $f2, $f2, $f3		# f2 = x^9/9
-	add.s drawangle, drawangle, $f2 # f23 = x - x^3/3 + x^5/5 - x^7/7 + x^9/9
-	
-	l.s $f2, flt_zero
-	c.le.s Vx, $f2
-	#bc1t 2nd_3rd
-	#j skip
-	c.le.s Vy, $f2
-	#bc1t 3rd_4th
-	
-	popfloat($f25)
-	popfloat($f3)
-	popfloat($f2)	
-	jr $ra
-																
+														
 redraw_rocket:
 	push($t5)
 	pushfloat($f2)
@@ -76,54 +16,36 @@ redraw_rocket:
 	pushfloat($f6)
 	push($ra)
 	
+	# adjust y coordinate with respect to rules of the display
 	la $s0, HEIGHT
 	subi $s0, $s0, 1
 	sub $t5, $s0, $t5	
 	
-	j not_third_quadrant
-	
-	## below is not functional
-	mov.s $f2, drawangle
-	li $s0, 1
-	l.s $f6, flt_zero
-	c.le.s $f6, Vx
-	bc1t not_second_third_quadrant
-	l.s $f6, pi
-	sub.s drawangle, $f6, drawangle
-	addi $s0, $s0, 1
-not_second_third_quadrant:
-	l.s $f6, flt_zero
-	c.le.s $f6, Vy
-	bc1t not_third_fourth_quadrant
-	l.s $f6, twopi
-	sub.s drawangle, $f6, drawangle
-	addi $s0, $s0, 1
-not_third_fourth_quadrant:
-	l.s $f6, flt_three
-	mtc1 $s0, $f3
-	cvt.s.w $f3, $f3
-	c.le.s $f6, $f3
-	bc1t not_third_quadrant
-	mov.s drawangle, $f2
-	l.s $f6, pi
-	add.s drawangle, drawangle, $f6
-	## ## ## ## ##
-not_third_quadrant:
+redraw_loop:
 	l.s $f29, pi
+	
+	# if drawangle is less than 180, skip
 	c.le.s drawangle, $f29
 	bc1t corrected_angle_1
+	
+	# if not, subtract by 180 until it is less
 	sub.s drawangle, drawangle, $f29
-	j not_third_quadrant
+	j redraw_loop
 corrected_angle_1:
 	l.s $f29, flt_zero
+	
+	# if draw angle is not negative, skip
 	c.le.s $f29, drawangle
 	bc1t corrected_angle_2
-	# abs value then subtract from pi
+	
+	# if it is, take abs value then subtract from pi
 	abs.s drawangle, drawangle
 	l.s $f29, pi
 	sub.s drawangle, $f29, drawangle
-	j not_third_quadrant
+	j redraw_loop
 corrected_angle_2:
+	# repeatedly increase an fpu register by 11.25 degrees
+	# check if angle is less than new interval, indicating which rocket frame to draw
 	l.s $f29, cutoff
 	l.s $f28, cutoff
 	add.s $f28, $f28, $f28

@@ -1,3 +1,5 @@
+# Implemented by Mohammed Aziz Quraishi and Anthony Ryabov
+
 .include "rocketCORDIC.asm"
 
 .data
@@ -13,7 +15,7 @@
     pushfloat($f6)
 	
     CORDIC %angle, $f4, $f6 # Get cos(angle) and sin(angle)
-    mtc1 %T, $f2
+    mtc1 %T, $f2            # thrust -> $f2
     cvt.s.w $f2, $f2
 
     mul.s %Tx, $f2, $f4     # Tx = T * cos(angle)
@@ -31,7 +33,7 @@
 .macro Ax(%Ax, %Tx, %m)
     pushfloat($f4)
 
-    mtc1 %m, $f4
+    mtc1 %m, $f4            # mass -> $f4
     cvt.s.w $f4, $f4
     
     # Ax = Tx/m
@@ -97,15 +99,17 @@
     div.s $f6, %Vx, $f8	# Normalized Vx
     div.s $f8, %Vy, $f8	# Normalized Vy
     
-    add.s eVx, eVx, $f6	# Accumulate normalized velocities
+    # Accumulate normalized velocities
+    add.s eVx, eVx, $f6
     add.s eVy, eVy, $f8
     
-    sub.s eVx, eVx, px	# subtract previous displacement
+    # subtract previous displacements
+    sub.s eVx, eVx, px
     sub.s eVy, eVy, py
 
     # Threshold for significant movement
     l.s $f15, flt_threshold	# Threshold for movement decision (e.g., 0.5)
-    l.s $f21, flt_zero
+    l.s $f21, flt_zero	# Zero for comparisons
 
     # Initialize Xf and Yf to current position
     move %Xf, %Xi		# Default Xf = Xi
@@ -118,16 +122,16 @@
     c.lt.s eVx, $f21	# Check if Vx < 0
     bc1t move_left		# Move left if true
     addi %Xf, %Xi, 1	# Move right
-    l.s px, flt_one
+    l.s px, flt_one		# Record positive x movement
     j done_x_movement
 
 move_left:
     subi %Xf, %Xi, 1	# Move left
-    l.s px, flt_neg_one
+    l.s px, flt_neg_one	# Record negative x movement
     j done_x_movement
 
 skip_x_movement:
-	l.s px, flt_zero
+	l.s px, flt_zero	# Record no x movement
 done_x_movement:
 
     # Determine Y movement
@@ -137,16 +141,16 @@ done_x_movement:
     c.lt.s eVy, $f21	# Check if Vy < 0
     bc1t move_down		# Move down if true
     addi %Yf, %Yi, 1	# Move up
-    l.s py, flt_one
+    l.s py, flt_one		# Record positive y movement
     j done_y_movement
 
 move_down:
     subi %Yf, %Yi, 1	# Move down
-    l.s py, flt_neg_one
+    l.s py, flt_neg_one	# Record negative y movement
     j done_y_movement
 
 skip_y_movement:
-	l.s py, flt_zero
+	l.s py, flt_zero	# Record no y movement
 done_y_movement:
 
     coordinate_done:
