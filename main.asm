@@ -15,8 +15,8 @@ start_angle: .float 1.570796    # 90 degrees in radians
 radianoffset: .float 0.26179
 
 welcome_message: .asciiz "Welcome to our program! Insert information here. "
-welcome_prompt: .asciiz "\n\nWould you like to participate? Press 1 to continue, 0 to exit: "
-retry_prompt: .asciiz "\n\nWould you like to retry? Type Y or N for your response: "
+welcome_prompt: .asciiz "\n\nWould you like to participate? Type 1 for yes or 0 for no: "
+retry_prompt: .asciiz "\n\nWould you like to retry? Type 1 for yes or 0 for no: "
 exit_message: .asciiz "\n\nExiting program..."
 error_message: .asciiz "\n\nExiting due to errors..."
 level_one_message: .asciiz "\nLevel 1: \n\n"
@@ -335,9 +335,15 @@ __keyboard_interrupt:
 	#held2 content
 
 yes:
+	li $v0, 11	# print the character entered 
+	move $a0, $k1 
+	syscall
 	li $a0, 1
 	j __resume
 no:
+	li $v0, 11	# print the character entered 
+	move $a0, $k1 
+	syscall
 	li $a0, 2
 	j __resume
 
